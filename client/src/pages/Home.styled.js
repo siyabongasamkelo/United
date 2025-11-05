@@ -7,7 +7,7 @@ export const HomeCover = styled.div`
   width: 100vw;
   height: 100vh;
 
-  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1)),
     url(${(props) => props.backgroundImage});
   background-size: cover;
   background-position: center;
