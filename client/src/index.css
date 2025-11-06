@@ -12,3 +12,8 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+* {
+  font-family: "Freckle Face", system-ui;
+  font-family: "Chewy", system-ui;
+}
