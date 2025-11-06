@@ -8,8 +8,6 @@ export const HeaderWrapper = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: "Freckle Face", system-ui;
-  font-family: "Chewy", system-ui;
 
   svg {
     display: none;
