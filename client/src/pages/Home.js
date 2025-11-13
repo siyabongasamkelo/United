@@ -5,8 +5,9 @@ import {
   LeftHero,
   LeftSidePhotoContainer,
   RightHero,
+  SocialMedia,
 } from "./Home.styled";
-// import homeImage from "../assets/img/home.jpeg";
+import { Instagram, Whatsapp, TwitterX, Facebook } from "react-bootstrap-icons";
 import { Container } from "react-bootstrap";
 import Header from "../components/common/Header";
 import home from "../assets/img/home.jpeg";
@@ -55,6 +56,14 @@ const Home = () => {
             </div>
           </RightHero>
         </HeroSection>
+        <SocialMedia>
+          <div>
+            <Facebook />
+            <Instagram />
+            <TwitterX />
+            <Whatsapp />
+          </div>
+        </SocialMedia>
       </HomeCover>
     </Container>
   );
