@@ -44,6 +44,11 @@ export const Links = styled.div`
     padding-left: 15px;
     text-decoration: none;
     color: rgba(0, 0, 0, 0.6);
+    transition: 0.5s ease-in-out;
+
+    &:hover {
+      color: ${({ theme }) => theme.color.primary};
+    }
   }
   @media only screen and (max-width: 600px) {
     display: none;
