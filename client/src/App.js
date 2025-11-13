@@ -11,8 +11,8 @@ import { ThemeProvider } from "styled-components";
 function App() {
   const theme = {
     color: {
-      primary: "#F87B1B",
-      secondary: " #11224E",
+      primary: "#EA2264",
+      secondary: " #F78D60",
       tetiary: "#FFC50F",
       text: "rgba(0,0,0,0.7)",
       smallText: "rgba(0, 0, 0, 0.6)",
