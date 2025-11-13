@@ -17,10 +17,13 @@ const Header = () => {
             <Link>About Us</Link>
           </li>
           <li>
-            <Link>Our Mission</Link>
+            <Link>Our Services</Link>
           </li>
           <li>
-            <Link>Reviews</Link>
+            <Link>Client Sectors</Link>
+          </li>
+          <li>
+            <Link>Contact Us</Link>
           </li>
         </ul>
       </Links>
