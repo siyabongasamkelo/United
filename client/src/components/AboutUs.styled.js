@@ -20,10 +20,29 @@ export const AboutHeaderAndIntro = styled.div`
       color: rgba(0, 0, 0, 0.6);
     }
   }
+
+  @media only screen and (max-width: 600px) {
+    h1 {
+      font-size: 2.5rem;
+    }
+    div {
+      width: 80%;
+      margin-left: 10%;
+
+      p {
+        font-size: 0.8rem;
+      }
+    }
+  }
 `;
 
 export const AboutUsCardsDiv = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: start;
+
+  @media only screen and (max-width: 600px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
