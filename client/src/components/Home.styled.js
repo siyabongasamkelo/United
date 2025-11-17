@@ -13,6 +13,22 @@ export const HeroSection = styled.div`
     flex-direction: column;
     height: 100%;
   }
+  @media only screen and (min-width: 600px) {
+    flex-direction: column;
+    height: 100%;
+  }
+  @media only screen and (min-width: 768px) {
+    flex-direction: column;
+    height: 100%;
+  }
+  @media only screen and (min-width: 992px) {
+    height: 65%;
+    flex-direction: row;
+  }
+  @media only screen and (min-width: 1200px) {
+  }
+
+  //this is the media queries for devices bigger than a mobile phone.
 `;
 
 //the hero section is devided into two parts
@@ -23,6 +39,20 @@ export const LeftHero = styled.div`
   @media only screen and (max-width: 600px) {
     width: 100%;
     height: 50%;
+  }
+  //this is the media queries for devices bigger than a mobile phone.
+  @media only screen and (min-width: 600px) {
+    width: 100%;
+    height: 50%;
+  }
+  //this is for landscape tablets
+  @media only screen and (min-width: 768px) {
+    width: 100%;
+    height: 50%;
+  }
+  @media only screen and (min-width: 992px) {
+    height: 100%;
+    width: 50%;
   }
 `;
 
@@ -90,6 +120,106 @@ export const RightHero = styled.div`
       }
     }
   }
+
+  @media only screen and (min-width: 600px) {
+    height: 30%;
+    width: 100%;
+    .middle-text {
+      display: none;
+    }
+    .upper-text {
+      display: none;
+    }
+    .lower-text {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+
+      h1 {
+        font-size: 3.5rem;
+        text-align: center;
+      }
+      button {
+        height: 20%;
+        width: 40%;
+        margin-top: 5%;
+      }
+    }
+  }
+
+  @media only screen and (min-width: 768px) {
+    height: 30%;
+    width: 100%;
+    .middle-text {
+      display: none;
+    }
+    .upper-text {
+      display: none;
+    }
+    .lower-text {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+
+      h1 {
+        font-size: 3.5rem;
+        text-align: center;
+      }
+      button {
+        height: 20%;
+        width: 40%;
+        margin-top: 5%;
+      }
+    }
+  }
+  @media only screen and (min-width: 992px) {
+    height: 100%;
+    width: 50%;
+    margin: 2%;
+
+    .upper-text {
+      height: 35%;
+      width: 100%;
+    }
+
+    .middle-text {
+      height: 35%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+
+      div {
+        width: 60%;
+      }
+      p {
+        font-family: "Chewy", system-ui;
+        color: rgba(0, 0, 0, 0.7);
+      }
+    }
+
+    .lower-text {
+      height: 35%;
+      width: 100%;
+      display: block;
+
+      h1 {
+        /* font-size: 72px; */
+        font-size: 5rem;
+        color: ${({ theme }) => theme.color.secondary};
+        text-align: left;
+      }
+
+      button {
+        height: 25%;
+        width: 28%;
+      }
+    }
+  }
 `;
 
 //This is the photo container that contains photo on the left hero section
@@ -145,6 +275,88 @@ export const LeftSidePhotoContainer = styled.div`
       }
     }
   }
+
+  @media only screen and (min-width: 600px) {
+    height: 90%;
+    .left-side-photos {
+      .upper-photos {
+        height: 50%;
+      }
+      .lower-photos {
+        img {
+          height: 30%;
+        }
+      }
+    }
+
+    .right-side-photos {
+      img {
+        height: 100%;
+      }
+    }
+  }
+
+  @media only screen and (min-width: 768px) {
+    height: 90%;
+    .left-side-photos {
+      .upper-photos {
+        height: 50%;
+      }
+      .lower-photos {
+        img {
+          height: 30%;
+        }
+      }
+    }
+
+    .right-side-photos {
+      img {
+        height: 100%;
+      }
+    }
+  }
+  @media only screen and (min-width: 992px) {
+    width: 100%;
+    height: 100%;
+    display: flex;
+
+    .left-side-photos {
+      width: 50%;
+      height: 100%;
+
+      .upper-photos {
+        width: 100%;
+        height: 30%;
+
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .lower-photos {
+        width: 100%;
+        height: 100%;
+
+        img {
+          width: 50%;
+          height: 20%;
+          margin-top: 5%;
+          margin-left: 50%;
+        }
+      }
+    }
+
+    .right-side-photos {
+      width: 50%;
+      height: 100%;
+      img {
+        height: 70%;
+        width: 90%;
+        margin-left: 5%;
+      }
+    }
+  }
 `;
 
 //This is the part that contains social media icons the lowest part
@@ -165,6 +377,10 @@ export const SocialMedia = styled.div`
   }
 
   @media only screen and (max-width: 600px) {
+    display: none;
+  }
+
+  @media only screen and (min-width: 600px) {
     display: none;
   }
 `;
