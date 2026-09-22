@@ -1,0 +1,16 @@
+====== CURRENT ARCHITECTURE CAPSULE (DO NOT FORGET) ======
+- Stack: MERN (TypeScript, Express, Mongoose, MongoDB).
+- Architecture Style: Feature-Driven, Highly Decoupled, Clean Architecture.
+- Cross-Cutting Utilities: Uses an "ApiError" class for exceptions and a custom "logger".
+
+1. QUIZ FEATURE ARCHITECTURE:
+   - Data separation: Static blueprint collection (Feat_Quiz_Master) handles nested Topic -> Chapter -> Questions sub-documents (correctAnswers are array strings kept on backend).
+   - Session tracking: Dynamic tracker collection (Feat_Quiz_Session) keeps track of userId (string), expiresAt (Date), and an answer-by-answer responses array storing 'timeSpentSeconds' per question.
+   - Flow: Backend evaluates answers and handles automated index/chapter advancing securely.
+
+2. UNIFIED AUTHENTICATION FEATURE:
+   - Schema (Sys_Auth_Credentials): Multi-identifier setup using an 'identifiers' array containing objects with { type: 'email'|'staff_number'|'national_id', value: string }. Unique index on value.
+   - States: Uses 'isPasswordSet' boolean to track incomplete admin-provisioned accounts.
+   - Roles: RBAC middleware hooks into Express Request types using global namespace declaration merging (req.user: { authId, role }).
+   - Email: Integrated via a centralized Brevo/Nodemailer 'sendEmail' script.
+==========================================================
