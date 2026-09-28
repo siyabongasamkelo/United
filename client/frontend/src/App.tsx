@@ -1,14 +1,10 @@
-import { Routes, Route } from "react-router-dom";
-import Register from "./features/auth/pages/Register";
+import React from "react";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./app/routes";
 
-function App() {
-  return (
-    <Routes>
-      {/* Public Route */}
-      <Route path="/register" element={<Register />} />
-      <Route path="/" element={<Register />} />
-    </Routes>
-  );
-}
+const App: React.FC = () => {
+  // App.tsx acts as the direct switcher for page delivery
+  return <RouterProvider router={router} />;
+};
 
 export default App;

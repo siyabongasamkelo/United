@@ -1,19 +1,16 @@
+import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import App from "./App";
-import { ThemeProvider } from "styled-components";
-import { theme as appTheme } from "./styles/theme";
-// import { AuthProvider } from "./context/AuthContext";
+import { RouterProvider } from "react-router-dom"; // ONLY RouterProvider! Delete BrowserRouter
+import { router } from "./app/routes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { GlobalStyle } from "./styles/GlobalStyle";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { theme } from "./app/theme";
+import "./index.css"; // Or whatever your global CSS filename is!
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <ThemeProvider theme={appTheme}>
-    {/* 🚀 MAGIC INJECTION: This activates your global CSS configurations! */}
-    <GlobalStyle />
-
-    <BrowserRouter>
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -23,10 +20,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         pauseOnHover
         theme="colored"
       />
-
-      {/* <AuthProvider> */}
-      <App />
-      {/* </AuthProvider> */}
-    </BrowserRouter>
-  </ThemeProvider>,
+      <CssBaseline />
+      {/* This delivers our centralized router context cleanly with zero loops! */}
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  </React.StrictMode>,
 );
