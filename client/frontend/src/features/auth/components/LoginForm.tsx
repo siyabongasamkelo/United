@@ -5,8 +5,6 @@ import {
   CardContent,
   TextField,
   Button,
-  Checkbox,
-  FormControlLabel,
   Typography,
   Link,
   InputAdornment,
@@ -14,7 +12,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import {
-  Person as PersonIcon,
   Mail as MailIcon,
   Lock as LockIcon,
   Visibility as VisibilityIcon,
@@ -22,43 +19,24 @@ import {
 } from "@mui/icons-material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { registerUser } from "../api/register";
+import { loginUser } from "../api/login";
 
-export const RegisterForm: React.FC = () => {
+export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
 
-  // 1. Core Input States
-  const [username, setUsername] = useState("");
+  // 1. Input & Loading States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [consent, setConsent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // 2. Performance & UI States
   const [isLoading, setIsLoading] = useState(false);
 
-  // 3. Airtight Validation Error States (Replaces Yup!)
-  const [errors, setErrors] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+  // 2. Custom 0kb Validation Error States
+  const [errors, setErrors] = useState({ email: "", password: "" });
 
-  // 4. Custom Validation Engine (0kb Bundle Cost)
   const validateForm = (): boolean => {
     let valid = true;
-    const newErrors = { username: "", email: "", password: "" };
+    const newErrors = { email: "", password: "" };
 
-    // Username Validation
-    if (!username.trim()) {
-      newErrors.username = "Username is required";
-      valid = false;
-    } else if (username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-      valid = false;
-    }
-
-    // Email Validation (Standard Regex)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
       newErrors.email = "Email address is required";
@@ -68,12 +46,8 @@ export const RegisterForm: React.FC = () => {
       valid = false;
     }
 
-    // Password Validation
     if (!password) {
       newErrors.password = "Password is required";
-      valid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
       valid = false;
     }
 
@@ -81,35 +55,24 @@ export const RegisterForm: React.FC = () => {
     return valid;
   };
 
-  // 5. Native Submission Handler with API & Toast Integration
+  // 3. Submit Handler
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Prevent submission if form rules are broken
     if (!validateForm()) return;
-
-    if (!consent) {
-      toast.warn("Please accept the data processing terms.");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Hit our lightweight feature API utility
-      const response = await registerUser({ username, email, password });
+      const response = await loginUser({ email, password });
+      toast.success(response.message || "Logged in successfully!");
 
-      toast.success(response.message || "Account created successfully!");
-
-      // Save session token if returned, then route to the dashboard instantly
       if (response.token) {
         localStorage.setItem("adept_token", response.token);
       }
 
       navigate("/dashboard");
     } catch (error: any) {
-      // Pop a clean, native toast notification detailing the specific backend block
-      toast.error(error.message || "Registration failed. Please try again.");
+      toast.error(error.message || "Invalid email or password.");
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +95,7 @@ export const RegisterForm: React.FC = () => {
         sx={{ maxWidth: 400, width: "100%", borderRadius: 3, boxShadow: 3 }}
       >
         <CardContent sx={{ p: 4 }}>
-          {/* Header Section */}
+          {/* Header */}
           <Typography
             variant="h5"
             component="h1"
@@ -140,7 +103,7 @@ export const RegisterForm: React.FC = () => {
             gutterBottom
             align="center"
           >
-            Create an Account
+            Welcome Back
           </Typography>
           <Typography
             variant="body2"
@@ -148,35 +111,10 @@ export const RegisterForm: React.FC = () => {
             align="center"
             sx={{ mb: 4 }}
           >
-            Join Adept and elevate your skills.
+            Log in to continue elevating your skills.
           </Typography>
 
-          {/* Form Structure */}
           <Box component="form" onSubmit={handleSubmit} noValidate>
-            {/* Username Field */}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              error={Boolean(errors.username)}
-              helperText={errors.username}
-              disabled={isLoading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon color={errors.username ? "error" : "action"} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
             {/* Email Field */}
             <TextField
               margin="normal"
@@ -186,6 +124,7 @@ export const RegisterForm: React.FC = () => {
               label="Email Address"
               name="email"
               autoComplete="email"
+              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={Boolean(errors.email)}
@@ -209,7 +148,7 @@ export const RegisterForm: React.FC = () => {
               label="Password"
               type={showPassword ? "text" : "password"}
               id="password"
-              autoComplete="new-password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={Boolean(errors.password)}
@@ -240,33 +179,15 @@ export const RegisterForm: React.FC = () => {
               }}
             />
 
-            {/* Data Consent Checkbox */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
-                  disabled={isLoading}
-                />
-              }
-              label={
-                <Typography variant="body2" color="text.secondary">
-                  I consent to Adept securely capturing and processing my data.
-                </Typography>
-              }
-              sx={{ mt: 2, mb: 1, alignItems: "flex-start" }}
-            />
-
-            {/* Main Action Button with Adaptive Loading Spinner */}
+            {/* Login Action Button */}
             <Button
               type="submit"
               fullWidth
               variant="contained"
               size="large"
-              disabled={!consent || isLoading}
+              disabled={isLoading}
               sx={{
-                mt: 3,
+                mt: 4,
                 mb: 3,
                 py: 1.5,
                 fontWeight: "bold",
@@ -277,21 +198,21 @@ export const RegisterForm: React.FC = () => {
               {isLoading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                "Create Account"
+                "Sign In"
               )}
             </Button>
 
-            {/* Existing Account Redirect Link */}
+            {/* Redirect to Register link */}
             <Box display="flex" justifyContent="center">
               <Typography variant="body2" color="text.secondary">
-                Already have an account?{" "}
+                Don't have an account yet?{" "}
                 <Link
                   component={RouterLink}
-                  to="/login"
+                  to="/register"
                   underline="hover"
                   fontWeight="medium"
                 >
-                  Sign In
+                  Register here
                 </Link>
               </Typography>
             </Box>

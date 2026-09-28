@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { RegisterForm } from "../features/auth";
-import { Box } from "@mui/material";
+import { RegisterForm, LoginForm } from "../features/auth"; // Imported LoginForm
 
 export const router = createBrowserRouter([
   {
@@ -10,16 +9,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/register",
-    // We wrap it in a strict full-screen Box right here to force the layout space open!
-    element: (
-      <Box sx={{ width: "100vw", height: "100vh", display: "block" }}>
-        <RegisterForm />
-      </Box>
-    ),
+    element: <RegisterForm />,
   },
   {
     path: "/login",
-    element: <div>Login Page Coming Soon!</div>,
+    element: <LoginForm />, // Cleanly mounted!
   },
   {
     path: "/dashboard",
