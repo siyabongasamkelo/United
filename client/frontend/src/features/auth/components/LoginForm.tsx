@@ -179,6 +179,18 @@ export const LoginForm: React.FC = () => {
               }}
             />
 
+            <Box display="flex" justifyContent="flex-end" sx={{ mt: 1 }}>
+              <Link
+                component={RouterLink}
+                to="/forgot-password"
+                variant="body2"
+                underline="hover"
+                fontWeight="medium"
+              >
+                Forgot Password?
+              </Link>
+            </Box>
+
             {/* Login Action Button */}
             <Button
               type="submit"

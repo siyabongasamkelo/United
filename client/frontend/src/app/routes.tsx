@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { RegisterForm, LoginForm } from "../features/auth"; // Imported LoginForm
+import { RegisterForm, LoginForm, ForgotPasswordForm } from "../features/auth"; // Imported ForgotPasswordForm
 
 export const router = createBrowserRouter([
   {
@@ -13,7 +13,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <LoginForm />, // Cleanly mounted!
+    element: <LoginForm />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordForm />, // Cleanly mounted!
   },
   {
     path: "/dashboard",
