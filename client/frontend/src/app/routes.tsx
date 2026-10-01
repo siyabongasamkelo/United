@@ -1,19 +1,24 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
-import AcademyPage from "../features/academy/AcademyPage"; // 💡 IMPORTS THE NEW PAGE
+import AcademyPage from "../features/academy/AcademyPage";
+import FleetAuditPage from "../features/fleet-audit/FleetAuditPage";
+import ShiftRosterPage from "../features/shift-roster/ShiftRosterPage";
+import FixReportPage from "../features/fix-report/FixReportPage";
+import LoginPage from "../features/auth/LoginPage";
 
-// Placeholders for remaining feature modules to tackle later
-const BayRadarPlaceholder = () => (
-  <div style={{ padding: "24px" }}>Bay Radar Layout coming soon.</div>
-);
-const ShiftLogPlaceholder = () => (
-  <div style={{ padding: "24px" }}>Shift Log Layout coming soon.</div>
-);
+// Remaining layout stubs for upcoming sprints
+
 const FixReportPlaceholder = () => (
   <div style={{ padding: "24px" }}>Fix Report Layout coming soon.</div>
 );
-const PaceSetterPlaceholder = () => (
-  <div style={{ padding: "24px" }}>Pace Setter Layout coming soon.</div>
+const BayRadarPlaceholder = () => (
+  <div style={{ padding: "24px" }}>Bay Radar Layout coming soon.</div>
+);
+
+const LoginPagePlaceholder = () => (
+  <div style={{ padding: "80px 20px", textAlign: "center" }}>
+    <h3>[ Your Existing Login Page Content Dropped Here ]</h3>
+  </div>
 );
 
 export const router = createBrowserRouter([
@@ -25,7 +30,24 @@ export const router = createBrowserRouter([
     path: "/academy",
     element: (
       <Layout>
-        <AcademyPage /> {/* 💡 NO LONGER A STRIPPED PLACEHOLDER! */}
+        <AcademyPage />
+      </Layout>
+    ),
+  },
+  {
+    path: "/fleet-audit", // 💡 ASSIGNED TO THE CORRECT HEADER ROUTE LINK
+    element: (
+      <Layout>
+        <FleetAuditPage /> {/* 💡 ACTIVE FULL SKELETON */}
+      </Layout>
+    ),
+  },
+
+  {
+    path: "/fix-report",
+    element: (
+      <Layout>
+        <FixReportPage /> {/* 💡 ACTIVE DYNAMIC MODULE */}
       </Layout>
     ),
   },
@@ -38,26 +60,18 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/shift-log",
+    path: "/shift-log", // Matches the header menu route link property
     element: (
       <Layout>
-        <ShiftLogPlaceholder />
+        <ShiftRosterPage /> {/* 💡 ACTIVE FULL FEATURES BLUEPRINT */}
       </Layout>
     ),
   },
   {
-    path: "/fix-report",
+    path: "/login", // 💡 NEW EXPLICIT ROUTE FOR YOUR AUTHENTICATION LAYER
     element: (
       <Layout>
-        <FixReportPlaceholder />
-      </Layout>
-    ),
-  },
-  {
-    path: "/pace-setter",
-    element: (
-      <Layout>
-        <PaceSetterPlaceholder />
+        <LoginPage />
       </Layout>
     ),
   },

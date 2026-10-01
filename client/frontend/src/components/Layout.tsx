@@ -21,8 +21,8 @@ import { Link as RouterLink } from "react-router-dom";
 // Define the navigation items explicitly so they are easy to update
 const navItems = [
   { label: "Academy", path: "/academy" },
-  { label: "Bay Radar", path: "/bay-radar" },
-  { label: "Shift Log", path: "/shift-log" },
+  { label: "fleet-audit", path: "/fleet-audit" },
+  { label: "shift log", path: "/shift-log" },
   { label: "Fix Report", path: "/fix-report" },
   { label: "Pace Setter", path: "/pace-setter" },
 ];
@@ -167,6 +167,8 @@ export default function Layout({ children }: LayoutProps) {
                   Learn More
                 </Button>
                 <Button
+                  component={RouterLink}
+                  to="/login" // 💡 Points straight to your new auth route
                   variant="contained"
                   sx={{
                     bgcolor: "#4f46e5",
