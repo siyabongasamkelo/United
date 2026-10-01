@@ -1,10 +1,14 @@
-import React from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./app/routes";
+import { CssBaseline } from "@mui/material";
 
-const App: React.FC = () => {
-  // App.tsx acts as the direct switcher for page delivery
-  return <RouterProvider router={router} />;
-};
-
-export default App;
+export default function App() {
+  return (
+    <>
+      {/* Resets standard browser CSS quirks cleanly across systems */}
+      <CssBaseline />
+      {/* Feeds our centralized routing map straight to the browser */}
+      <RouterProvider router={router} />
+    </>
+  );
+}

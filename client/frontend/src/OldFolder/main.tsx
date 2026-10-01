@@ -1,11 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom"; // ONLY RouterProvider! Delete BrowserRouter
+import { router } from "./app/routes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "./app/theme";
 import "./index.css"; // Or whatever your global CSS filename is!
-import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -21,7 +22,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       />
       <CssBaseline />
       {/* This delivers our centralized router context cleanly with zero loops! */}
-      <App />
+      <RouterProvider router={router} />
     </ThemeProvider>
   </React.StrictMode>,
 );

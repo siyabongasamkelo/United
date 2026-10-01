@@ -1,0 +1,12 @@
+/* Wipes out all default Vite layout constraints */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: block !important;
+  overflow-x: hidden;
+  background-color: #f9fafb; /* Sets our default off-white layout canvas */
+}
