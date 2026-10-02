@@ -1,0 +1,43 @@
+TECHNICAL DESIGN DOCUMENT (TDD)
+SYSTEM SPECIFICATION: UTS FLOOR DEPLOYMENT TERMINAL
+Author: Digital Operations Architect & Specialist
+Target Organization: United Trolley Services (UTS)
+System Status: High-Fidelity Frontend Prototype Validated
+Date: 1 October 2026
+1. EXECUTIVE SUMMARY & BUSINESS VALUE BLUEPRINT
+1.1 Operational Objective
+The UTS Floor Deployment Terminal is an enterprise-grade mobile and desktop platform designed explicitly to eliminate operational friction, halt asset degradation, and optimize labor-hour metrics across major retail deployment fields, specifically targeting the high-volume environment of Gateway Theatre of Shopping.
+1.2 Financial Capital Optimization (ROI)
+• Eradicating Onboarding Training Lag: Traditional trolley porter onboarding incurs a 3-to-5 day lag phase where new hires mismanage assets, causing empty storefront bays and lost mall revenue. The UTS Academy module mitigates this by providing a zero-day instant deployment loop, optimizing shift labor costs from minute one.
+• Asset Accountability & Shielding Liability: Malls issue heavy financial penalties to subcontractors when storefront bays empty out. Simultaneously, retail anchors constantly accuse handling teams of losing equipment. The Fleet Audit tracking system establishes a bulletproof digital audit trail, proving fleet integrity and shifting legal liability away from UTS.
+• Corporate Tender Leverage: This proprietary system transitions UTS from a traditional manual labor subcontractor into an advanced, digitally accounted logistics enterprise, giving the sales team an immense technical advantage when bidding for multi-million rand corporate retail tenders.
+2. SYSTEM ARCHITECTURE & COMPONENT TOPOLOGY
+2.1 Monolithic vs. Feature-Driven Architecture (FDA)
+To prevent code degradation, the application is engineered strictly under a Feature-Driven Architecture (FDA) pattern using React, TypeScript, and Material-UI (MUI). Code files are decoupled into isolated feature domains (academy, fleet-audit, shift-roster, fix-report) combining localized UI micro-controllers with raw data engines.
+2.2 Frontend-to-Backend Data Synchronisation Engine
+The interface acts as a high-performance consumer of structured JSON payloads. The system is designed to interface with a secure cloud infrastructure (e.g., Node.js/Python REST API backed by a PostgreSQL database instance):
+• State Management: When a supervisor logs a stock-take or shift roster change, the client dispatches an asymmetric asynchronous HTTP request payload (POST /api/v1/audits) containing strict numeric tokens.
+• Database Pipeline: The backend processes the state metrics, calculates the delta deviation against the historical baseline, and immediately updates the system state tables.
+3. CORE MODULE TECHNICAL SPECIFICATIONS
+3.1 Module 1: UTS Academy (Floor Manual)
+• Technical Design: Employs an ultra-scannable vertical accordion matrix nested with lazy-loading <CardMedia> wrappers.
+• Operational Control: Instructions are broken down into granular The Rule and The Ground Reason bullet points. Images are configured with an objectFit: "contain" landscape layout to ensure zero screen boundary overflow across low-end mobile devices on slow mall Wi-Fi networks.
+3.2 Module 2: Fleet Audit Tracker & Analytics
+• Technical Design: Combines a conditional UI rendering array grid with a data ingestion form.
+• Operational Control: Displays individual store cards (Game, Clicks, Dis-Chem) detailing active fleet units, damage thresholds, and an automated text engine flashing a red color-coded "Weekly Delta Link" if assets are dropping. The input mechanism utilizes an Autocomplete dropdown menu and text inputs locked strictly to HTML type number to prevent manual text entry errors.
+3.3 Module 3: Shift Roster Matrix & Click Allocator
+• Technical Design: Utilizes a custom state-driven menu selector coupled with a fluid flexbox wrapper layout.
+• Operational Control: Divides a 12-man crew into 3 staggered peak-hour waves (Morning, Reinforcement, Night Sweepers) alongside off-day accountability logs. The allocation console allows the supervisor to tap a porter's name, popping up an anchor overlay menu that deploys them instantly to a shift grid, running a strict flexWrap: "wrap" constraint to ensure no UI overlapping on compact mobile screens.
+3.4 Module 4: Fix Report (Asset Maintenance Compound)
+• Technical Design: A real-time structural defect queuing list mapped to common failure points.
+• Operational Control: Allows porters to isolate cracked chassis frames, bent back-gates, or frozen castor wheel bearings into a distinct "Pending Repair" list before they degrade front-line customer metrics.
+3.5 Module 5: Secure Operator Terminal (Auth Guard)
+• Technical Design: A restricted interface form implementing client-side routing protection.
+• Operational Control: Features an isolated floating form configuration using protected password visibility toggles. To preserve strict data confidentiality regarding worker schedules and asset allocation tables, user access is routed through an explicit backend check, rendering a "Contact Site Admin" gateway to prevent public registration loops.
+4. DEPLOYMENT & SYSTEMS INTEGRATION ROADMAP
+Phase 1: Frontend Architecture Validation (Complete)
+High-fidelity, responsive client-side layout system fully built and tested across laptop and mobile web configurations.
+Phase 2: Centralized Database Integration (Next Step)
+Designing the backend data model tables and wiring up JWT (JSON Web Tokens) user session authentication.
+Phase 3: Live Floor Testing & Alpha Launch
+Deploying the live portal directly to the Gateway supervisor team to monitor real-time tracking performance.
