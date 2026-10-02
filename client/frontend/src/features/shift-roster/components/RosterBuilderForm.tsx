@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -86,14 +86,19 @@ export default function RosterBuilderForm() {
       <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
         {/* Title and Reset Bar */}
         <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 3 }}
+          sx={{
+            mb: 3,
+            direction: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack spacing={1} sx={{ direction: "row", alignItems: "center" }}>
             <EventAvailable sx={{ color: "#4f46e5", fontSize: 22 }} />
-            <Typography variant="subtitle1" fontWeight="900" color="#1e1b4b">
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: "900", color: "#1e1b4b" }}
+            >
               Effortless Shift Allocator
             </Typography>
           </Stack>
@@ -131,20 +136,22 @@ export default function RosterBuilderForm() {
         >
           <Typography
             variant="caption"
-            fontWeight="800"
-            color="text.secondary"
-            sx={{ display: "block", mb: 1.5, textTransform: "uppercase" }}
+            sx={{
+              display: "block",
+              mb: 1.5,
+              textTransform: "uppercase",
+              fontWeight: "800",
+              color: "text.secondary",
+            }}
           >
             👉 Tap a Porter to Deploy Them Instantaneously
           </Typography>
 
           {/* 💡 FIXED CONTAINER BELOW: Added flexWrap and useFlexGap to drop buttons onto the next row automatically */}
           <Stack
-            direction="row"
-            flexWrap="wrap"
             useFlexGap
             spacing={1}
-            sx={{ gap: 1 }}
+            sx={{ gap: 1, direction: "row", flexWrap: "wrap" }}
           >
             {getPortersInShift("unassigned").map((p) => (
               <Button
@@ -205,7 +212,7 @@ export default function RosterBuilderForm() {
               color: "#475569",
             },
           ].map((shift) => (
-            <Grid item xs={12} sm={6} key={shift.key}>
+            <Grid key={shift.key} size={{ xs: 12, sm: 6 }}>
               <Box
                 sx={{
                   p: 2,
@@ -217,18 +224,20 @@ export default function RosterBuilderForm() {
               >
                 <Typography
                   variant="caption"
-                  fontWeight="900"
-                  sx={{ color: shift.color, display: "block", mb: 1 }}
+                  sx={{
+                    color: shift.color,
+                    display: "block",
+                    mb: 1,
+                    fontWeight: "900",
+                  }}
                 >
                   {shift.title} ({getPortersInShift(shift.key).length})
                 </Typography>
 
                 <Stack
-                  direction="row"
                   spacing={0.5}
-                  flexWrap="wrap"
                   useFlexGap
-                  sx={{ gap: 0.5 }}
+                  sx={{ gap: 0.5, direction: "row", flexWrap: "wrap" }}
                 >
                   {getPortersInShift(shift.key).map((p) => (
                     <Chip

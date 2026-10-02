@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,8 +9,7 @@ import {
   Button,
   Stack,
   Alert,
-  MenuItem,
-  Grid, // <-- ADDED THIS ONE LINE
+  Grid,
 } from "@mui/material";
 import { Build, Send } from "@mui/icons-material";
 
@@ -58,9 +57,12 @@ export default function ReportForm() {
       }}
     >
       <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 3, alignItems: "center" }}>
           <Build sx={{ color: "#4f46e5", fontSize: 22 }} />
-          <Typography variant="subtitle1" fontWeight="900" color="#1e1b4b">
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: "900", color: "#1e1b4b" }}
+          >
             Log Broken Equipment Frame
           </Typography>
         </Stack>
@@ -83,7 +85,7 @@ export default function ReportForm() {
             />
 
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Autocomplete
                   options={stores}
                   value={selectedStore}
@@ -98,7 +100,7 @@ export default function ReportForm() {
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Autocomplete
                   options={components}
                   value={selectedPart}
@@ -113,7 +115,7 @@ export default function ReportForm() {
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Autocomplete
                   options={severities}
                   value={selectedSeverity}

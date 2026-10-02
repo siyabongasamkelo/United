@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
   TrendingFlat,
   Storefront,
 } from "@mui/icons-material";
-import { mockStoreAudits } from "../data/mockAudits";
 import type { StoreAudit } from "../data/mockAudits"; // 💡 Separated type indicator
 
 interface StoreAuditCardProps {
@@ -56,9 +54,7 @@ export default function StoreAuditCard({ audit }: StoreAuditCardProps) {
           <Storefront sx={{ color: "#1e1b4b", fontSize: 20 }} />
           <Typography
             variant="subtitle1"
-            fontWeight="900"
-            color="#1e1b4b"
-            sx={{ letterSpacing: 0.2 }}
+            sx={{ letterSpacing: 0.2, color: "#1e1b4b", fontWeight: "900" }}
           >
             {audit.storeName}
           </Typography>
@@ -67,14 +63,16 @@ export default function StoreAuditCard({ audit }: StoreAuditCardProps) {
         {/* Big Numbers Layer */}
         <Stack
           direction="row"
-          alignItems="baseline"
           spacing={1.5}
-          sx={{ mb: 1 }}
+          sx={{ mb: 1, alignItems: "baseline" }}
         >
-          <Typography variant="h3" fontWeight="900" color="#0f172a">
+          <Typography variant="h3" sx={{ fontWeight: "900", color: "#0f172a" }}>
             {audit.totalTrolleys}
           </Typography>
-          <Typography variant="caption" fontWeight="700" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{ fontWeight: "700", color: "text.secondary" }}
+          >
             total fleet units
           </Typography>
         </Stack>
@@ -93,7 +91,10 @@ export default function StoreAuditCard({ audit }: StoreAuditCardProps) {
           }}
         >
           <DeltaIcon sx={{ color: deltaColor, fontSize: 16 }} />
-          <Typography variant="caption" fontWeight="800" color={deltaColor}>
+          <Typography
+            variant="caption"
+            sx={{ fontWeight: "800", color: { deltaColor } }}
+          >
             {isLoss ? "" : isGain ? "+" : ""}
             {audit.weeklyDelta} units ({audit.deltaPercentage}%) vs last week
           </Typography>
@@ -104,19 +105,21 @@ export default function StoreAuditCard({ audit }: StoreAuditCardProps) {
         {/* Operational Status Section */}
         <Typography
           variant="caption"
-          color="text.secondary"
-          fontWeight="800"
-          sx={{ display: "block", mb: 1, textTransform: "uppercase" }}
+          sx={{
+            display: "block",
+            mb: 1,
+            textTransform: "uppercase",
+            fontWeight: "800",
+            color: "text.secondary",
+          }}
         >
           Current Status Breakdown
         </Typography>
 
         <Stack
-          direction="row"
           spacing={1}
-          flexWrap="wrap"
           useFlexGap
-          sx={{ gap: 1 }}
+          sx={{ gap: 1, direction: "row", flexWrap: "wrap" }}
         >
           <Chip
             label={`${activeDeployment} Active`}

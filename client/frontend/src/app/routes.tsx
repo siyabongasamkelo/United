@@ -5,21 +5,7 @@ import FleetAuditPage from "../features/fleet-audit/FleetAuditPage";
 import ShiftRosterPage from "../features/shift-roster/ShiftRosterPage";
 import FixReportPage from "../features/fix-report/FixReportPage";
 import LoginPage from "../features/auth/LoginPage";
-
-// Remaining layout stubs for upcoming sprints
-
-const FixReportPlaceholder = () => (
-  <div style={{ padding: "24px" }}>Fix Report Layout coming soon.</div>
-);
-const BayRadarPlaceholder = () => (
-  <div style={{ padding: "24px" }}>Bay Radar Layout coming soon.</div>
-);
-
-const LoginPagePlaceholder = () => (
-  <div style={{ padding: "80px 20px", textAlign: "center" }}>
-    <h3>[ Your Existing Login Page Content Dropped Here ]</h3>
-  </div>
-);
+import ShiftAttendancePage from "../features/attendance/ShiftAttendancePage";
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +17,14 @@ export const router = createBrowserRouter([
     element: (
       <Layout>
         <AcademyPage />
+      </Layout>
+    ),
+  },
+  {
+    path: "/attendance",
+    element: (
+      <Layout>
+        <ShiftAttendancePage />
       </Layout>
     ),
   },
@@ -51,14 +45,7 @@ export const router = createBrowserRouter([
       </Layout>
     ),
   },
-  {
-    path: "/bay-radar",
-    element: (
-      <Layout>
-        <BayRadarPlaceholder />
-      </Layout>
-    ),
-  },
+
   {
     path: "/shift-log", // Matches the header menu route link property
     element: (

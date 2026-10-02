@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Card, CardContent, Stack, Chip } from "@mui/material";
 import { mockDefectReports } from "../data/mockReports";
 
@@ -6,10 +5,14 @@ export default function ActiveQueueList() {
   return (
     <Box>
       <Typography
-        variant="subtitle2"
-        color="text.secondary"
-        fontWeight="800"
-        sx={{ mb: 2, textTransform: "uppercase", fontSize: "0.75rem" }}
+        sx={{
+          mb: 2,
+          textTransform: "uppercase",
+          fontSize: "0.75rem",
+          variant: "subtitle2",
+          color: "text.secondary",
+          fontWeight: "800",
+        }}
       >
         Active Maintenance Compound Queue
       </Typography>
@@ -32,7 +35,9 @@ export default function ActiveQueueList() {
               }}
             >
               <Box>
-                <Typography variant="body2" fontWeight="800" color="#1e1b4b">
+                <Typography
+                  sx={{ variant: "body2", fontWeight: "800", color: "#1e1b4b" }}
+                >
                   ⚙️ {report.trolleyNumber} — {report.brokenPart}
                 </Typography>
                 <Typography

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Card,
@@ -89,18 +89,23 @@ export default function LoginPage() {
               <LockOpen fontSize="medium" />
             </Box>
             <Typography
-              variant="h5"
-              fontWeight="900"
-              color="#1e1b4b"
-              sx={{ letterSpacing: -0.5 }}
+              sx={{
+                letterSpacing: -0.5,
+                variant: "h5",
+                fontWeight: "900",
+                color: "#1e1b4b",
+              }}
             >
               UTS Operator Login
             </Typography>
             <Typography
-              variant="caption"
-              color="text.secondary"
-              fontWeight="600"
-              sx={{ mt: 0.5, display: "block" }}
+              sx={{
+                mt: 0.5,
+                display: "block",
+                variant: "caption",
+                color: "text.secondary",
+                fontWeight: "600",
+              }}
             >
               Secure Gateway Deployment Terminal
             </Typography>
@@ -148,22 +153,25 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePassword}
-                        edge="end"
-                        size="small"
-                      >
-                        {showPassword ? (
-                          <VisibilityOff sx={{ fontSize: 18 }} />
-                        ) : (
-                          <Visibility sx={{ fontSize: 18 }} />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
+                // ✅ Changed from InputProps to modern slotProps.input syntax
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePassword}
+                          edge="end"
+                          size="small"
+                        >
+                          {showPassword ? (
+                            <VisibilityOff sx={{ fontSize: 18 }} />
+                          ) : (
+                            <Visibility sx={{ fontSize: 18 }} />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
 
@@ -189,19 +197,23 @@ export default function LoginPage() {
               {/* 💡 FIXED: Added the clean "Don't have an account?" link line right here */}
               <Box sx={{ textAlign: "center", mt: 1.5 }}>
                 <Typography
-                  variant="caption"
-                  fontWeight="600"
-                  color="text.secondary"
+                  sx={{
+                    variant: "caption",
+                    fontWeight: "600",
+                    color: "text.secondary",
+                  }}
                 >
                   Don't have an account?{" "}
                   <Typography
-                    component="span"
-                    variant="caption"
-                    fontWeight="700"
-                    color="#4f46e5"
                     sx={{
                       cursor: "pointer",
-                      "&:hover": { textDecoration: "underline" },
+                      "&:hover": {
+                        textDecoration: "underline",
+                        component: "span",
+                        variant: "caption",
+                        fontWeigh: "700",
+                        color: "#4f46e5",
+                      },
                     }}
                   >
                     Contact Site Admin

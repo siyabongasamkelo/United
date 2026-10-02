@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Typography, Card, CardContent, Tabs, Tab } from "@mui/material";
 import DailyTimeline from "./components/DailyTimeline";
 import RosterBuilderForm from "./components/RosterBuilderForm"; // 💡 IMPORTED THE ALLOCATOR
@@ -7,7 +7,8 @@ import { mockWeeklyRoster } from "./data/mockRoster";
 export default function ShiftRosterPage() {
   const [activeTab, setActiveTab] = useState(0);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  // ✅ Clean and perfectly type-safe
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
@@ -28,9 +29,8 @@ export default function ShiftRosterPage() {
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
           <Typography
             variant="h5"
-            fontWeight="900"
-            color="#1e1b4b"
             gutterBottom
+            sx={{ fontWeight: "900", color: "1e1b4b" }}
           >
             Shift Roster & Deployment Matrix
           </Typography>
@@ -68,14 +68,14 @@ export default function ShiftRosterPage() {
       <Box sx={{ mt: 5 }}>
         <Typography
           variant="subtitle2"
-          color="text.secondary"
-          fontWeight="800"
           sx={{
             mb: 2,
             px: 0.5,
             textTransform: "uppercase",
             letterSpacing: 0.5,
             fontSize: "0.75rem",
+            color: "text.secondary",
+            fontWeight: "800",
           }}
         >
           Roster Generation Controls

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Typography,
   Accordion,
@@ -15,22 +15,22 @@ export default function LessonConsole() {
   const [expanded, setExpanded] = useState<string | false>("panel-1");
 
   const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
     };
 
   return (
     <Box>
       <Typography
-        variant="subtitle2"
-        color="text.secondary"
-        fontWeight="800"
         sx={{
           mb: 2,
           px: 0.5,
           textTransform: "uppercase",
           letterSpacing: 0.5,
           fontSize: "0.75rem",
+          variant: "subtitle2",
+          color: "text.secondary",
+          fontWeight: "800",
         }}
       >
         Active Onboarding Modules
@@ -62,7 +62,9 @@ export default function LessonConsole() {
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <AssignmentInd sx={{ color: "#4f46e5", fontSize: 20 }} />
-                <Typography variant="body2" fontWeight="800" color="#1e1b4b">
+                <Typography
+                  sx={{ variant: "body2", fontWeight: "800", color: "#1e1b4b" }}
+                >
                   {lesson.topicNumber}: {lesson.title}
                 </Typography>
               </Box>
@@ -90,10 +92,12 @@ export default function LessonConsole() {
                   <Box key={sIdx} sx={{ mb: 3, "&:last-child": { mb: 0 } }}>
                     {/* Sub-Header Title */}
                     <Typography
-                      variant="body2"
-                      fontWeight="800"
-                      color="#1e1b4b"
-                      sx={{ mb: 1 }}
+                      sx={{
+                        mb: 1,
+                        variant: "body2",
+                        fontWeight: "800",
+                        color: "#1e1b4b",
+                      }}
                     >
                       {sub.title}
                     </Typography>

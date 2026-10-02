@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, Box, Typography, Button } from "@mui/material";
 import { Map } from "@mui/icons-material";
 
@@ -22,7 +22,11 @@ export default function AxisMap() {
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
           <Map sx={{ color: "#4f46e5", fontSize: 20 }} />
-          <Typography variant="subtitle2" fontWeight="700" color="text.primary">
+          <Typography
+            variant="subtitle2"
+            color="text.primary"
+            sx={{ fontWeight: "700" }} // ✅ Moved inside sx prop
+          >
             The UTS Floor Axis (Anchor Map)
           </Typography>
         </Box>
@@ -126,9 +130,8 @@ export default function AxisMap() {
         >
           <Typography
             variant="caption"
-            fontWeight="700"
             color="primary.main"
-            sx={{ display: "block" }}
+            sx={{ display: "block", fontWeight: "700" }} // ✅ Combined together
           >
             {activeParking}
           </Typography>

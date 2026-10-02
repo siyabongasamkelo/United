@@ -1,0 +1,69 @@
+# UTS Floor Portal — Session Handoff & Architecture Blueprint
+**Project Status:** Active Dev Sprint Complete  
+**Date:** 1 October 2026  
+**Architecture:** Feature-Driven Architecture (FDA)  
+**Tech Stack:** React (Vite) + TypeScript + Material-UI (MUI) + React Router DOM
+
+---
+
+## 📁 Active File & Directory Map
+All modules have been cleanly separated into isolated components and data engines to maintain absolute architectural control:
+
+```text
+src/
+├── app/                        # Global Setup Matrix
+│   └── routes.tsx              # Central Router (createBrowserRouter Engine)
+├── components/                 # Reusable Global Shell Wrappers
+│   └── Layout.tsx              # Adept Header Appbar, Responsive Mobile Drawer & Footer
+└── features/                   # Core Business Modules (FDA)
+    ├── academy/                # Module 1: Floor Training Portal
+    │   ├── data/lessons.ts     # Centralized repository for all 10 visual guidelines
+    │   ├── components/         
+    │   │   └── LessonConsole.ts# Dynamic Accordion system with bulletproof CardMedia scale
+    │   └── AcademyPage.tsx     # Focused central column with motivating welcome statement
+    │
+    ├── fleet-audit/            # Module 2: Live Stock-Take & Delta Analytics
+    │   ├── data/mockAudits.ts  # Trackers for totals, damages, dirtiness & weekly delta calculations
+    │   ├── components/         
+    │   │   ├── StoreAuditCard.ts # Reusable card UI rendering conditional color-coded logic
+    │   │   └── AuditLogForm.ts # Searchable Autocomplete selector + strict numeric entry pads
+    │   └── FleetAuditPage.tsx  # Executive overview sheet (Data Rows first, Form block below)
+    │
+    ├── shift-roster/           # Module 3: 3-Wave Allocation Matrix
+    │   ├── data/mockRoster.ts  # Crew arrays mapping porters across designated time fields
+    │   ├── components/         
+    │   │   ├── DailyTimeline.ts# Scannable shift segments with functional status badges
+    │   │   └── RosterBuilderForm.ts # Effortless Click-to-Assign menu manager with row flex-wrap fixes
+    │   └── ShiftRosterPage.tsx # Master scheduler holding interactive day-tab switcher controls
+    │
+    └── fix-report/             # Module 4: Maintenance Compound Queue
+        ├── data/mockReports.ts # Array tracking active broken items, origins & severities
+        ├── components/         
+        │   ├── ReportForm.ts   # Damage logger input panel (Grid layout imports fixed)
+        │   └── ActiveQueueList.ts # Scannable card queue monitoring pending repairs
+        └── FixReportPage.tsx   # Entry container showing workshop line above submission blocks
+```
+
+---
+
+## ⚡ What We Locked Down Today
+
+1. **The System Bottleneck Broken:** Shifted completely away from slow manual pixel-pushing layouts into an **AI-Accelerated, Data-First UI assembly model**, treating screens purely as views mapping structured datasets.
+2. **Dynamic UI Responsiveness:** Built universal breakpoints across all pages—displaying as structured side-by-side columns/grids on computers and folding cleanly into vertical thumb-scannable timelines on mobile phones.
+3. **Strict Formatting & Crash Fixes:** 
+   * Resolved the `Uncaught SyntaxError` type-bundler crash inside `StoreAuditCard` using explicit `import type` definitions.
+   * Debugged the `<Grid>` import omission inside `ReportForm` to restore React Router DOM stability.
+   * Restructured the `RosterBuilderForm` layout using `flexWrap: "wrap"` and `useFlexGap` to stop name buttons from punching through the right-hand boundary of the layout on mobile windows.
+
+---
+
+## 🏁 Tomorrow's Launchpad Priorities
+
+When we pick up the hammers tomorrow, here is our precise operational roadmap to transition this dashboard from a clean frontend prototype into a secured application:
+
+* **Security Boundary Lockdown (`ProtectedRoute.tsx`):** Construct an isolated authentication guard component wrapper inside `src/features/auth/` to intercept route entry, kicking anonymous page queries straight back to our new `/login` panel.
+* **Global Tokens Configuration (`src/app/theme.ts`):** Centralize all Material-UI typography parameters, custom button radiuses, and your core brand hex codes (Adept Navy, Purple, and Amber) so we can drop manual hex definitions from the source code entirely.
+* **API Data Pipeline Verification:** Discuss connecting our structured typescript datasets (`lessons.ts`, `mockAudits.ts`) directly to live backend REST endpoints or database handlers.
+
+---
+*Take a good rest, brother! This codebase is in pristine condition. Tomorrow we lock it down and prepare it to capture real operational metrics on the Gateway floor!*

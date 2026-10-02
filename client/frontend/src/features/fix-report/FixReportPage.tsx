@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Card, CardContent } from "@mui/material";
 import ActiveQueueList from "./components/ActiveQueueList";
 import ReportForm from "./components/ReportForm";
@@ -19,9 +18,8 @@ export default function FixReportPage() {
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
           <Typography
             variant="h5"
-            fontWeight="900"
-            color="#1e1b4b"
             gutterBottom
+            sx={{ fontWeight: "900", color: "#1e1b4b" }}
           >
             Fix Report & Asset Integrity Console
           </Typography>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,13 +18,15 @@ import {
 import { Menu as MenuIcon } from "@mui/icons-material";
 import { Link as RouterLink } from "react-router-dom";
 
+// ... inside your component:
+
 // Define the navigation items explicitly so they are easy to update
 const navItems = [
   { label: "Academy", path: "/academy" },
   { label: "fleet-audit", path: "/fleet-audit" },
   { label: "shift log", path: "/shift-log" },
   { label: "Fix Report", path: "/fix-report" },
-  { label: "Pace Setter", path: "/pace-setter" },
+  { label: "Attendance", path: "/attendance" },
 ];
 
 interface LayoutProps {
@@ -55,8 +57,11 @@ export default function Layout({ children }: LayoutProps) {
           <ListItem key={item.label} disablePadding>
             <ListItemButton component={RouterLink} to={item.path}>
               <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{ fontWeight: "600", color: "#334155" }}
+                primary={
+                  <Typography sx={{ fontWeight: "600", color: "#334155" }}>
+                    {item.label}
+                  </Typography>
+                }
               />
             </ListItemButton>
           </ListItem>
@@ -68,16 +73,21 @@ export default function Layout({ children }: LayoutProps) {
         >
           <ListItemButton>
             <ListItemText
-              primary="Learn More"
-              primaryTypographyProps={{ fontWeight: "600" }}
+              primary={
+                <Typography sx={{ fontWeight: "600" }}>Learn More</Typography>
+              }
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem disablePadding>
           <ListItemButton>
             <ListItemText
-              primary="Login"
-              primaryTypographyProps={{ fontWeight: "800", color: "#4f46e5" }}
+              primary={
+                <Typography sx={{ fontWeight: "800", color: "#4f46e5" }}>
+                  Login
+                </Typography>
+              }
             />
           </ListItemButton>
         </ListItem>

@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Card, CardContent, Grid } from "@mui/material";
 import StoreAuditCard from "./components/StoreAuditCard";
 import { mockStoreAudits } from "./data/mockAudits";
@@ -27,9 +26,8 @@ export default function FleetAuditPage() {
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
           <Typography
             variant="h5"
-            fontWeight="900"
-            color="#1e1b4b"
             gutterBottom
+            sx={{ fontWeight: "900", color: "#1e1b4b" }}
           >
             Fleet Audit & Operational Intelligence
           </Typography>
@@ -61,14 +59,14 @@ export default function FleetAuditPage() {
       <Box sx={{ mb: 5 }}>
         <Typography
           variant="subtitle2"
-          color="text.secondary"
-          fontWeight="800"
           sx={{
             mb: 2.5,
             px: 0.5,
             textTransform: "uppercase",
             letterSpacing: 0.5,
             fontSize: "0.75rem",
+            color: "text.secondary",
+            fontWeight: "800",
           }}
         >
           Territory Active Audits
@@ -76,7 +74,7 @@ export default function FleetAuditPage() {
 
         <Grid container spacing={3}>
           {mockStoreAudits.map((storeData) => (
-            <Grid item xs={12} sm={6} md={4} key={storeData.id}>
+            <Grid key={storeData.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <StoreAuditCard audit={storeData} />
             </Grid>
           ))}
@@ -87,14 +85,14 @@ export default function FleetAuditPage() {
       <Box>
         <Typography
           variant="subtitle2"
-          color="text.secondary"
-          fontWeight="800"
           sx={{
             mb: 2,
             px: 0.5,
             textTransform: "uppercase",
             letterSpacing: 0.5,
             fontSize: "0.75rem",
+            color: "text.secondary",
+            fontWeight: "800",
           }}
         >
           Shift Logging Console

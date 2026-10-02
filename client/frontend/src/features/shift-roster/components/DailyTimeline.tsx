@@ -1,13 +1,4 @@
-import React from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-  Chip,
-  Divider,
-} from "@mui/material";
+import { Box, Typography, Card, CardContent, Stack, Chip } from "@mui/material";
 import { WbSunny, LightMode, DarkMode, Bedtime } from "@mui/icons-material";
 import type { DailyRoster, PorterAssignment } from "../data/mockRoster";
 
@@ -35,12 +26,15 @@ export default function DailyTimeline({ roster }: DailyTimelineProps) {
         <Box>
           <Typography
             variant="body2"
-            fontWeight="700"
             color={isOff ? "text.disabled" : "#0f172a"}
+            sx={{ fontWeight: "700" }}
           >
             {porter.name}
           </Typography>
-          <Typography variant="caption" color="text.secondary" fontWeight="500">
+          <Typography
+            variant="caption"
+            sx={{ color: "text.secondary", fontWeight: "500" }}
+          >
             📍 {porter.location}
           </Typography>
         </Box>
@@ -61,13 +55,14 @@ export default function DailyTimeline({ roster }: DailyTimelineProps) {
       <Card variant="outlined" sx={{ borderRadius: 3, borderColor: "#e2e8f0" }}>
         <CardContent sx={{ p: 2.5 }}>
           <Stack
-            direction="row"
-            alignItems="center"
             spacing={1}
-            sx={{ mb: 1.5 }}
+            sx={{ mb: 1.5, direction: "row", alignItems: "center" }}
           >
             <WbSunny sx={{ color: "#f59e0b", fontSize: 20 }} />
-            <Typography variant="body2" fontWeight="900" color="#1e1b4b">
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "900", color: "#1e1b4b" }}
+            >
               MORNING WAVE (06:00 - 14:00)
             </Typography>
           </Stack>
@@ -83,13 +78,14 @@ export default function DailyTimeline({ roster }: DailyTimelineProps) {
       <Card variant="outlined" sx={{ borderRadius: 3, borderColor: "#e2e8f0" }}>
         <CardContent sx={{ p: 2.5 }}>
           <Stack
-            direction="row"
-            alignItems="center"
             spacing={1}
-            sx={{ mb: 1.5 }}
+            sx={{ mb: 1.5, direction: "row", alignItems: "center" }}
           >
             <LightMode sx={{ color: "#3b82f6", fontSize: 20 }} />
-            <Typography variant="body2" fontWeight="900" color="#1e1b4b">
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "900", color: "#1e1b4b" }}
+            >
               MID-DAY REINFORCEMENTS (11:00 - 19:00)
             </Typography>
           </Stack>
@@ -105,13 +101,14 @@ export default function DailyTimeline({ roster }: DailyTimelineProps) {
       <Card variant="outlined" sx={{ borderRadius: 3, borderColor: "#e2e8f0" }}>
         <CardContent sx={{ p: 2.5 }}>
           <Stack
-            direction="row"
-            alignItems="center"
             spacing={1}
-            sx={{ mb: 1.5 }}
+            sx={{ mb: 1.5, direction: "row", alignItems: "center" }}
           >
             <DarkMode sx={{ color: "#4f46e5", fontSize: 20 }} />
-            <Typography variant="body2" fontWeight="900" color="#1e1b4b">
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "900", color: "#1e1b4b" }}
+            >
               NIGHT SWEEPERS (17:00 - 22:00)
             </Typography>
           </Stack>
@@ -130,13 +127,14 @@ export default function DailyTimeline({ roster }: DailyTimelineProps) {
       >
         <CardContent sx={{ p: 2.5 }}>
           <Stack
-            direction="row"
-            alignItems="center"
             spacing={1}
-            sx={{ mb: 1.5 }}
+            sx={{ mb: 1.5, direction: "row", alignItems: "center" }}
           >
             <Bedtime sx={{ color: "#64748b", fontSize: 20 }} />
-            <Typography variant="body2" fontWeight="900" color="#475569">
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "900", color: "#475569" }}
+            >
               MANDATORY OFF TODAY
             </Typography>
           </Stack>

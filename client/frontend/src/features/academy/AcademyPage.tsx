@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Card, CardContent } from "@mui/material";
 import LessonConsole from "./components/LessonConsole";
 
@@ -18,11 +17,13 @@ export default function AcademyPage() {
       >
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
           <Typography
-            variant="h5"
-            fontWeight="900"
-            color="#1e1b4b"
             gutterBottom
-            sx={{ letterSpacing: -0.5 }}
+            sx={{
+              letterSpacing: -0.5,
+              variant: "h5",
+              fontWeight: "900",
+              color: "#1e1b4b",
+            }}
           >
             Welcome to the UTS Team Floor Portal
           </Typography>

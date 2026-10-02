@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -87,7 +87,10 @@ export default function AuditLogForm() {
         {/* Form Title Heading */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
           <PlaylistAddCheck sx={{ color: "#4f46e5", fontSize: 22 }} />
-          <Typography variant="subtitle1" fontWeight="900" color="#1e1b4b">
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: "900", color: "#1e1b4b" }}
+          >
             Supervisor Daily Log Console
           </Typography>
         </Box>
@@ -110,7 +113,7 @@ export default function AuditLogForm() {
               options={storeOptions}
               getOptionLabel={(option) => option.label}
               value={selectedStore}
-              onChange={(event, newValue) => {
+              onChange={(_event, newValue) => {
                 setSelectedStore(newValue);
                 setFeedback(null); // Clear errors dynamically
               }}
@@ -136,7 +139,11 @@ export default function AuditLogForm() {
                 required
                 value={totalCount}
                 onChange={(e) => setTotalCount(e.target.value)}
-                inputProps={{ min: 0 }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                  },
+                }}
               />
 
               <TextField
@@ -147,7 +154,12 @@ export default function AuditLogForm() {
                 fullWidth
                 value={damagedCount}
                 onChange={(e) => setDamagedCount(e.target.value)}
-                inputProps={{ min: 0 }}
+                // inputProps={{ min: 0 }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                  },
+                }}
               />
 
               <TextField
@@ -158,7 +170,12 @@ export default function AuditLogForm() {
                 fullWidth
                 value={dirtyCount}
                 onChange={(e) => setDirtyCount(e.target.value)}
-                inputProps={{ min: 0 }}
+                // inputProps={{ min: 0 }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                  },
+                }}
               />
             </Stack>
 
