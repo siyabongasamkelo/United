@@ -4,7 +4,7 @@ import {
   CreateSessionSchema,
   SubmitAnswerSchema,
 } from "../validatons/quiz.validation.js";
-import { validate } from "../../../middlewares/validate.middleware.js"; // Standard request validator middleware snippet
+import { validate } from "../../../middleware/validate.middleware.js"; // Standard request validator middleware snippet
 
 const router = Router();
 const controller = new QuizController();

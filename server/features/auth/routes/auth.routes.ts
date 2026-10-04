@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller.js";
-import { validate } from "../../../middlewares/validate.middleware.js"; // Universal validation runtime wrapper middleware
-import { authorizeRoles } from "../../../middlewares/authMiddleware.js"; // The authorization guard we built previously
+import { validate } from "../../../middleware/validate.middleware.js"; // Universal validation runtime wrapper middleware
+import { authorizeRoles } from "../../../shared/middleware/authMiddleware.js"; // The authorization guard we built previously
 import {
   StudentRegisterSchema,
   AdminCreateUserSchema,

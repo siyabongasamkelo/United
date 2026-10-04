@@ -1,0 +1,30 @@
+united-trolley-backend/
+├── features/
+│   └── users/
+│       ├── controllers/
+│       │   └── UserController.ts     <── Pristine HTTP request interceptor (thin pipe)
+│       ├── models/
+│       │   └── User.ts               <── Mongoose Schema with embedded AssignedStores sub-documents
+│       ├── repositories/
+│       │   └── UserRepository.ts     <── Data Isolation Layer (handles direct MongoDB operations)
+│       ├── routes/
+│       │   └── userRoutes.ts         <── Clerk & Role protected network endpoint boundaries
+│       └── services/
+│           └── UserService.ts        <── Central Business Logic & Winston Telemetry engine
+│
+├── logs/                             
+│   └── adept-telemetry-YYYY-MM-DD.log <── Auto-rotating daily performance log archives 🔒
+│
+├── shared/
+│   └── middleware/                   <── Consolidated System Interceptor Gates
+│       ├── authMiddleware.ts         <── Highly secure Clerk JWT Session Role validator
+│       ├── errorMiddleware.ts        <── Centralised global error parser (Factory Pattern)
+│       └── loggerMiddleware.ts       <── Active floor request & console device signature tracker
+│
+├── telemetry/
+│   └── logger.ts                     <── High-density Winston logger core utility config
+│
+├── .env                              <── Houses MONGO_URI, CLERK_SECRET_KEY, & PORT tokens
+├── package.json                      <── Manages dependencies like winston-daily-rotate-file
+├── server.ts                         <── Master entry application file bootstrapping Express & MongoDB
+└── tsconfig.json                     <── Fixed root resolution file with modern path aliasing
