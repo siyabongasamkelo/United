@@ -1,3 +1,4 @@
+import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import AcademyPage from "../features/academy/AcademyPage";
@@ -6,6 +7,14 @@ import ShiftRosterPage from "../features/shift-roster/ShiftRosterPage";
 import FixReportPage from "../features/fix-report/FixReportPage";
 import LoginPage from "../features/auth/LoginPage";
 import ShiftAttendancePage from "../features/attendance/ShiftAttendancePage";
+import ClerkDiagnosticsPage from "../features/auth/ClerkDiagnosticsPage";
+
+// 🔓 THE ROUTE GUARD WRAPPER (DEACTIVATED)
+// This is now an open gateway. It completely ignores Clerk status
+// and passes the components straight into your layout framework.
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  return <Layout>{children}</Layout>;
+};
 
 export const router = createBrowserRouter([
   {
@@ -15,47 +24,53 @@ export const router = createBrowserRouter([
   {
     path: "/academy",
     element: (
-      <Layout>
+      <ProtectedRoute>
         <AcademyPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/diagnostics",
+    element: (
+      <Layout>
+        <ClerkDiagnosticsPage />
       </Layout>
     ),
   },
   {
     path: "/attendance",
     element: (
-      <Layout>
+      <ProtectedRoute>
         <ShiftAttendancePage />
-      </Layout>
+      </ProtectedRoute>
     ),
   },
   {
-    path: "/fleet-audit", // 💡 ASSIGNED TO THE CORRECT HEADER ROUTE LINK
+    path: "/fleet-audit",
     element: (
-      <Layout>
-        <FleetAuditPage /> {/* 💡 ACTIVE FULL SKELETON */}
-      </Layout>
+      <ProtectedRoute>
+        <FleetAuditPage />
+      </ProtectedRoute>
     ),
   },
-
   {
     path: "/fix-report",
     element: (
-      <Layout>
-        <FixReportPage /> {/* 💡 ACTIVE DYNAMIC MODULE */}
-      </Layout>
+      <ProtectedRoute>
+        <FixReportPage />
+      </ProtectedRoute>
     ),
   },
-
   {
-    path: "/shift-log", // Matches the header menu route link property
+    path: "/shift-log",
     element: (
-      <Layout>
-        <ShiftRosterPage /> {/* 💡 ACTIVE FULL FEATURES BLUEPRINT */}
-      </Layout>
+      <ProtectedRoute>
+        <ShiftRosterPage />
+      </ProtectedRoute>
     ),
   },
   {
-    path: "/login", // 💡 NEW EXPLICIT ROUTE FOR YOUR AUTHENTICATION LAYER
+    path: "/login",
     element: (
       <Layout>
         <LoginPage />

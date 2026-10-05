@@ -1,0 +1,11 @@
+united-trolley-frontend/
+└── src/
+    └── features/
+        └── fleet-audits/
+            ├── services/
+            │   └── fleetAuditService.ts   <── Pure Network Layer (Axios HTTP Calls Only)
+            ├── context/
+            │   └── FleetAuditContext.tsx  <── State Distribution Layer (Loading, Audits Array, Tracking)
+            └── components/
+                ├── FleetAuditForm.tsx     <── Thin UI Component (Consumes Context, Captures Inputs)
+                └── AuditDashboard.tsx     <── Thin UI Component (Displays Context Data)

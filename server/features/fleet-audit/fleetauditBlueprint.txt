@@ -1,0 +1,10 @@
+united-trolley-backend/
+└── features/
+    └── fleet-audits/
+        ├── models/
+        ├── repositories/
+        ├── validations/
+        ├── services/
+        ├── controllers/
+        └── routes/
+            └── fleetAuditRoutes.ts  <── Network Endpoint Boundaries (We are building this)

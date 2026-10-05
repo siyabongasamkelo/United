@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { requestLogger } from "./shared/middleware/loggerMiddleware";
 import { errorHandler } from "./shared/middleware/errorMiddleware";
 import userRoutes from "./features/users/routes/userRoutes";
+import fleetAuditRoutes from "./features/fleet-audit/routes/fleetAuditRoutes";
 import { telemetry } from "./shared/telemetry/logger";
 
 // Initialize environment configuration variables
@@ -20,17 +21,16 @@ app.use(express.json());
 app.use(requestLogger);
 
 // ❷ Feature Module Route Allocations
-app.use("/api/users", userRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/fleet-audits", fleetAuditRoutes);
 
 // A simple system health ping to ensure the server core is running
 app.get("/health", (req, res) => {
-  res
-    .status(200)
-    .json({
-      status: "ONLINE",
-      system: "ADEPT CORE ENGINE",
-      timestamp: new Date(),
-    });
+  res.status(200).json({
+    status: "ONLINE",
+    system: "ADEPT CORE ENGINE",
+    timestamp: new Date(),
+  });
 });
 
 // ❸ Fallback Centralized Global Error Middleware (Must sit beneath all route definitions)

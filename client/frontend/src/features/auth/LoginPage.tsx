@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -10,6 +10,7 @@ import {
   IconButton,
   InputAdornment,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   Visibility,
@@ -18,40 +19,113 @@ import {
   ArrowForward,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useSignIn, useAuth } from "@clerk/clerk-react"; // 🎯 Imported useAuth to monitor session state
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const { isSignedIn } = useAuth(); // 🔍 Detect hidden background tokens instantly
 
   // Local structural form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
 
   const handleTogglePassword = () => setShowPassword(!showPassword);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  // 🛡️ THE AUTOMATIC ESCAPE GATEWAYS
+  // If Clerk evaluates that you are already authenticated via hidden storage hooks,
+  // bypass the login panels cleanly and push straight into your academy dashboard route!
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      console.log(
+        "🔄 Background active session detected. Forcing auto-forward...",
+      );
+      navigate("/academy", { replace: true });
+    }
+  }, [isLoaded, isSignedIn, navigate]);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoaded) return;
+
     setErrorFeedback(null);
+    setIsSubmitting(true);
+
+    // 🛡️ EXTRA PROTECTION: Double-check state to intercept duplicate 400 API requests
+    if (isSignedIn) {
+      toast.success("Welcome back! Loading your operator portal...", {
+        autoClose: 3000,
+      });
+      setTimeout(() => {
+        setIsSubmitting(false);
+        navigate("/academy");
+      }, 3000);
+      return;
+    }
 
     // Quick client-side validation guard
     if (!email || !password) {
       setErrorFeedback(
         "Access Denied: Please fill in all required credential fields.",
       );
+      setIsSubmitting(false);
       return;
     }
 
-    // Mock Authentication Logic (This payload will connect directly to your backend API route later!)
-    const authPayload = { email, password };
-    console.log("Authenticating UTS Operator:", authPayload);
+    try {
+      console.log(
+        "Starting secure authentication transmission directly over Clerk...",
+      );
 
-    // If successful, fly them straight to the main Academy dashboard layout!
-    navigate("/academy");
+      // ❶ Attempt login authentication request
+      const result = await signIn.create({
+        identifier: email,
+        password: password,
+      });
+
+      // ❷ Process active session mapping
+      if (result.status === "complete") {
+        console.log(
+          "🔒 Credentials verified. Syncing active session state into browser...",
+        );
+
+        // First, fully register the session into Clerk's underlying React context state engine
+        await setActive({ session: result.createdSessionId });
+
+        // Display your beautiful custom success toast layout notice
+        toast.success("Hey, you've successfully logged in!", {
+          autoClose: 3000,
+        });
+
+        // ❸ Delay navigation safely for exactly 3 seconds so the operator reads the message toast
+        setTimeout(() => {
+          setIsSubmitting(false);
+          navigate("/academy");
+        }, 3000);
+      } else {
+        console.warn("Additional verification steps required:", result.status);
+        setErrorFeedback(`Authentication status incomplete: ${result.status}`);
+        setIsSubmitting(false);
+      }
+    } catch (err: any) {
+      console.error("Clerk login interaction failure catch block caught:", err);
+
+      // Smoothly parse Clerk's native error stack or fallback to general text
+      const displayMessage =
+        err.errors?.[0]?.longMessage ||
+        err.message ||
+        "Invalid email or security password. Please verify your credentials.";
+
+      setErrorFeedback(displayMessage);
+      setIsSubmitting(false); // 🌟 Always turn off the spinner immediately on failure!
+    }
   };
 
   return (
-    // 💡 Responsive Flex Center Container: Centers the login card on PC, takes full space on mobile
     <Box
       sx={{
         minHeight: "75vh",
@@ -89,20 +163,16 @@ export default function LoginPage() {
               <LockOpen fontSize="medium" />
             </Box>
             <Typography
-              sx={{
-                letterSpacing: -0.5,
-                variant: "h5",
-                fontWeight: "900",
-                color: "#1e1b4b",
-              }}
+              variant="h5"
+              sx={{ letterSpacing: -0.5, fontWeight: "900", color: "#1e1b4b" }}
             >
               UTS Operator Login
             </Typography>
             <Typography
+              variant="caption"
               sx={{
                 mt: 0.5,
                 display: "block",
-                variant: "caption",
                 color: "text.secondary",
                 fontWeight: "600",
               }}
@@ -129,7 +199,6 @@ export default function LoginPage() {
           {/* Form Action Fields */}
           <Box component="form" onSubmit={handleLoginSubmit}>
             <Stack spacing={2.5}>
-              {/* Email Input Field */}
               <TextField
                 label="Company Email Address"
                 type="email"
@@ -137,12 +206,12 @@ export default function LoginPage() {
                 fullWidth
                 required
                 size="small"
+                disabled={isSubmitting}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
               />
 
-              {/* Password Input Field with Interactive Toggle */}
               <TextField
                 label="Security Password"
                 type={showPassword ? "text" : "password"}
@@ -150,10 +219,10 @@ export default function LoginPage() {
                 fullWidth
                 required
                 size="small"
+                disabled={isSubmitting}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                // ✅ Changed from InputProps to modern slotProps.input syntax
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -162,6 +231,7 @@ export default function LoginPage() {
                           onClick={handleTogglePassword}
                           edge="end"
                           size="small"
+                          disabled={isSubmitting}
                         >
                           {showPassword ? (
                             <VisibilityOff sx={{ fontSize: 18 }} />
@@ -175,12 +245,17 @@ export default function LoginPage() {
                 }}
               />
 
-              {/* Action Submit Button */}
-              {/* Action Submit Button */}
               <Button
                 type="submit"
                 variant="contained"
-                endIcon={<ArrowForward />}
+                disabled={isSubmitting}
+                endIcon={
+                  isSubmitting ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <ArrowForward />
+                  )
+                }
                 sx={{
                   bgcolor: "#1e1b4b",
                   fontWeight: "800",
@@ -191,29 +266,22 @@ export default function LoginPage() {
                   "&:hover": { bgcolor: "#2e2a72" },
                 }}
               >
-                Verify & Enter Portal
+                {isSubmitting ? "Verifying..." : "Verify & Enter Portal"}
               </Button>
 
-              {/* 💡 FIXED: Added the clean "Don't have an account?" link line right here */}
               <Box sx={{ textAlign: "center", mt: 1.5 }}>
                 <Typography
-                  sx={{
-                    variant: "caption",
-                    fontWeight: "600",
-                    color: "text.secondary",
-                  }}
+                  variant="caption"
+                  sx={{ fontWeight: "600", color: "text.secondary" }}
                 >
                   Don't have an account?{" "}
                   <Typography
+                    component="span"
+                    variant="caption"
                     sx={{
+                      fontWeight: "800",
+                      color: "#4f46e5",
                       cursor: "pointer",
-                      "&:hover": {
-                        textDecoration: "underline",
-                        component: "span",
-                        variant: "caption",
-                        fontWeigh: "700",
-                        color: "#4f46e5",
-                      },
                     }}
                   >
                     Contact Site Admin

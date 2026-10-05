@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -16,17 +16,18 @@ import {
   Container,
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { Link as RouterLink } from "react-router-dom";
-
-// ... inside your component:
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useClerk } from "@clerk/clerk-react"; // 🎯 Using the raw clerk engine hook directly
 
 // Define the navigation items explicitly so they are easy to update
 const navItems = [
   { label: "Academy", path: "/academy" },
-  { label: "fleet-audit", path: "/fleet-audit" },
-  { label: "shift log", path: "/shift-log" },
+  { label: "Fleet Audit", path: "/fleet-audit" },
+  { label: "Shift Log", path: "/shift-log" },
   { label: "Fix Report", path: "/fix-report" },
   { label: "Attendance", path: "/attendance" },
+  { label: "Diagnostics", path: "/diagnostics" },
 ];
 
 interface LayoutProps {
@@ -35,12 +36,32 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const theme = useTheme();
-  // Automatically switches to mobile mode if screen width is below 'md' (900px)
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const clerk = useClerk(); // 🔍 Direct access to the low-level session keys
+  const navigate = useNavigate();
+
+  // 🛡️ THE BULLETPROOF AUTH CHECK (Proven by our raw dump)
+  // If clerk.session exists and we have a valid user ID, the operator is 100% online.
+  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
+
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
+  };
+
+  // Safe global logout function handler
+  const handleLogout = async () => {
+    try {
+      await clerk.signOut();
+      toast.info("Logged out successfully. See you next shift!", {
+        autoClose: 2500,
+      });
+      navigate("/login");
+    } catch (error) {
+      console.error("Clerk sign-out exception encounter:", error);
+      toast.error("Failed to safely sign out.");
+    }
   };
 
   // Mobile Drawer Menu content
@@ -53,19 +74,21 @@ export default function Layout({ children }: LayoutProps) {
         UTS PORTAL
       </Typography>
       <List>
-        {navItems.map((item) => (
-          <ListItem key={item.label} disablePadding>
-            <ListItemButton component={RouterLink} to={item.path}>
-              <ListItemText
-                primary={
-                  <Typography sx={{ fontWeight: "600", color: "#334155" }}>
-                    {item.label}
-                  </Typography>
-                }
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {/* 🌟 Display features list if the operator is authenticated */}
+        {isOperatorLoggedIn &&
+          navItems.map((item) => (
+            <ListItem key={item.label} disablePadding>
+              <ListItemButton component={RouterLink} to={item.path}>
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: "600", color: "#334155" }}>
+                      {item.label}
+                    </Typography>
+                  }
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
 
         <ListItem
           disablePadding
@@ -80,17 +103,32 @@ export default function Layout({ children }: LayoutProps) {
           </ListItemButton>
         </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemText
-              primary={
-                <Typography sx={{ fontWeight: "800", color: "#4f46e5" }}>
-                  Login
-                </Typography>
-              }
-            />
-          </ListItemButton>
-        </ListItem>
+        {/* 🔐 MOBILE DYNAMIC AUTH BUTTON */}
+        {isOperatorLoggedIn ? (
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemText
+                primary={
+                  <Typography sx={{ fontWeight: "800", color: "#ef4444" }}>
+                    Logout
+                  </Typography>
+                }
+              />
+            </ListItemButton>
+          </ListItem>
+        ) : (
+          <ListItem disablePadding>
+            <ListItemButton component={RouterLink} to="/login">
+              <ListItemText
+                primary={
+                  <Typography sx={{ fontWeight: "800", color: "#4f46e5" }}>
+                    Login
+                  </Typography>
+                }
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -123,33 +161,35 @@ export default function Layout({ children }: LayoutProps) {
                 color: "#f59e0b",
                 cursor: "pointer",
               }}
+              onClick={() => navigate("/")}
             >
               ADEPT
             </Typography>
 
-            {/* Middle: Desktop Navigation Links */}
+            {/* Middle: Desktop Navigation Links (Only shown when authenticated) */}
             {!isMobile && (
               <Box sx={{ display: "flex", gap: 1 }}>
-                {navItems.map((item) => (
-                  <Button
-                    key={item.label}
-                    component={RouterLink} // 💡 Crucial change: tells MUI to behave like a React router node
-                    to={item.path} // 💡 Passes path data safely
-                    sx={{
-                      color: "rgba(255, 255, 255, 0.85)",
-                      fontWeight: "600",
-                      textTransform: "none",
-                      px: 2,
-                      fontSize: "0.9rem",
-                      "&:hover": {
-                        color: "#ffffff",
-                        bgcolor: "rgba(255,255,255,0.08)",
-                      },
-                    }}
-                  >
-                    {item.label}
-                  </Button>
-                ))}
+                {isOperatorLoggedIn &&
+                  navItems.map((item) => (
+                    <Button
+                      key={item.label}
+                      component={RouterLink}
+                      to={item.path}
+                      sx={{
+                        color: "rgba(255, 255, 255, 0.85)",
+                        fontWeight: "600",
+                        textTransform: "none",
+                        px: 2,
+                        fontSize: "0.9rem",
+                        "&:hover": {
+                          color: "#ffffff",
+                          bgcolor: "rgba(255,255,255,0.08)",
+                        },
+                      }}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
               </Box>
             )}
 
@@ -176,21 +216,40 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   Learn More
                 </Button>
-                <Button
-                  component={RouterLink}
-                  to="/login" // 💡 Points straight to your new auth route
-                  variant="contained"
-                  sx={{
-                    bgcolor: "#4f46e5",
-                    fontWeight: "700",
-                    textTransform: "none",
-                    px: 3,
-                    borderRadius: 2,
-                    "&:hover": { bgcolor: "#4338ca" },
-                  }}
-                >
-                  Login
-                </Button>
+
+                {/* 🔐 DESKTOP DYNAMIC AUTH BUTTON */}
+                {isOperatorLoggedIn ? (
+                  <Button
+                    onClick={handleLogout}
+                    variant="contained"
+                    sx={{
+                      bgcolor: "#dc2626",
+                      fontWeight: "700",
+                      textTransform: "none",
+                      px: 3,
+                      borderRadius: 2,
+                      "&:hover": { bgcolor: "#b91c1c" },
+                    }}
+                  >
+                    Logout
+                  </Button>
+                ) : (
+                  <Button
+                    component={RouterLink}
+                    to="/login"
+                    variant="contained"
+                    sx={{
+                      bgcolor: "#4f46e5",
+                      fontWeight: "700",
+                      textTransform: "none",
+                      px: 3,
+                      borderRadius: 2,
+                      "&:hover": { bgcolor: "#4338ca" },
+                    }}
+                  >
+                    Login
+                  </Button>
+                )}
               </Box>
             )}
           </Toolbar>
@@ -202,7 +261,7 @@ export default function Layout({ children }: LayoutProps) {
         anchor="right"
         open={drawerOpen}
         onClose={handleDrawerToggle}
-        ModalProps={{ keepMounted: true }} // Better mobile performance
+        ModalProps={{ keepMounted: true }}
       >
         {drawerContent}
       </Drawer>
