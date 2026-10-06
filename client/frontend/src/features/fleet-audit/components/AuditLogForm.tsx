@@ -40,8 +40,7 @@ export default function FleetAuditForm() {
 
         <Typography
           variant="caption"
-          display="block"
-          sx={{ color: "#64748b", mb: 3, fontWeight: "500" }}
+          sx={{ color: "#64748b", mb: 3, fontWeight: "500", display: "block" }}
         >
           Active Inspector:{" "}
           <strong>{f.currentUser?.fullName || "Resolving..."}</strong> (
