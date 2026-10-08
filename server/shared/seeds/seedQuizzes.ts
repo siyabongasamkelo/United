@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { QuizTopic } from "../features/safety-quizzes/models/QuizTopic"; // Keep your model path as is
+import { QuizTopic } from "../../features/safety-quizzes/models/QuizTopic"; // Keep your model path as is
 import dotenv from "dotenv";
 import path from "path"; // ❶ Import the core Node.js path module
 
