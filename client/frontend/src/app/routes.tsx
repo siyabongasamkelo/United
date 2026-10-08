@@ -8,6 +8,7 @@ import FixReportPage from "../features/fix-report/FixReportPage";
 import LoginPage from "../features/auth/LoginPage";
 import ShiftAttendancePage from "../features/attendance/ShiftAttendancePage";
 import ClerkDiagnosticsPage from "../features/auth/ClerkDiagnosticsPage";
+import QuizDashboardPage from "../features/safety-quizzes/QuizDashboardPage";
 
 // 🔓 THE ROUTE GUARD WRAPPER (DEACTIVATED)
 // This is now an open gateway. It completely ignores Clerk status
@@ -20,6 +21,14 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/academy" replace />,
+  },
+  {
+    path: "/quiz-test",
+    element: (
+      <ProtectedRoute>
+        <QuizDashboardPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/academy",

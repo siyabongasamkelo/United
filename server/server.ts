@@ -6,6 +6,7 @@ import { requestLogger } from "./shared/middleware/loggerMiddleware";
 import { errorHandler } from "./shared/middleware/errorMiddleware";
 import userRoutes from "./features/users/routes/userRoutes";
 import fleetAuditRoutes from "./features/fleet-audit/routes/fleetAuditRoutes";
+import safteyQuizzesRoutes from "./features/safety-quizzes/routes/quizRoutes";
 import { telemetry } from "./shared/telemetry/logger";
 
 // Initialize environment configuration variables
@@ -23,6 +24,7 @@ app.use(requestLogger);
 // ❷ Feature Module Route Allocations
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/fleet-audits", fleetAuditRoutes);
+app.use("/api/v1/safety-quizzes", safteyQuizzesRoutes);
 
 // A simple system health ping to ensure the server core is running
 app.get("/health", (req, res) => {

@@ -43,6 +43,7 @@ export const configureAxiosInterceptors = (clerkSession: any) => {
         error.response?.data?.message ||
         "An unexpected network operational failure occurred.";
 
+      console.log("🚫 Network Interceptor: ", error);
       // Overwrite the generic Axios error message with our specific server response details
       const customError = new Error(serverErrorMessage);
       (customError as any).status = error.response?.status;

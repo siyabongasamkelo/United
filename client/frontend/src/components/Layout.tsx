@@ -24,10 +24,11 @@ import { useClerk } from "@clerk/clerk-react"; // 🎯 Using the raw clerk engin
 const navItems = [
   { label: "Academy", path: "/academy" },
   { label: "Fleet Audit", path: "/fleet-audit" },
-  { label: "Shift Log", path: "/shift-log" },
+  // { label: "Shift Log", path: "/shift-log" },
   { label: "Fix Report", path: "/fix-report" },
   { label: "Attendance", path: "/attendance" },
-  { label: "Diagnostics", path: "/diagnostics" },
+  { label: "Quiz Test", path: "/quiz-test" },
+  // { label: "Diagnostics", path: "/diagnostics" },
 ];
 
 interface LayoutProps {
