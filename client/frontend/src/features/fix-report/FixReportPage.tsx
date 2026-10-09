@@ -1,8 +1,31 @@
 import { Box, Typography, Card, CardContent } from "@mui/material";
+import { useState, useEffect, useCallback } from "react";
 import ActiveQueueList from "./components/ActiveQueueList";
 import ReportForm from "./components/ReportForm";
+import { FixReportService } from "./services/fixReportService";
+import type { IFixReportResponse } from "./services/fixReportService";
 
 export default function FixReportPage() {
+  const [queue, setQueue] = useState<IFixReportResponse[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Re-fetch the live queue indices safely from Atlas cloud on mutations
+  const fetchLiveQueue = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await FixReportService.getActiveMaintenanceQueue();
+      setQueue(data);
+    } catch (err) {
+      console.error("Failed syncing territory yard active logs:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveQueue();
+  }, [fetchLiveQueue]);
+
   return (
     <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: "800px", mx: "auto" }}>
       {/* ❶ PURPOSE EXPLANATION BLOCK */}
@@ -13,6 +36,7 @@ export default function FixReportPage() {
           borderColor: "#e2e8f0",
           bgcolor: "#ffffff",
           mb: 4,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.01)",
         }}
       >
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
@@ -37,14 +61,14 @@ export default function FixReportPage() {
         </CardContent>
       </Card>
 
-      {/* ❷ LIVE QUEUE LIST SECTION (READ FIRST) */}
+      {/* ❷ LIVE WORKSHOP QUEUE TRACKER GRID */}
       <Box sx={{ mb: 5 }}>
-        <ActiveQueueList />
+        <ActiveQueueList queue={queue} loading={loading} />
       </Box>
 
-      {/* ❸ ACTION LOGGER FORM BLOCK (WRITE SECOND) */}
+      {/* ❸ ACTION LOGGER FORM BLOCK WITH REFRESH TRIGGER LOGIC */}
       <Box>
-        <ReportForm />
+        <ReportForm onReportAdded={fetchLiveQueue} />
       </Box>
     </Box>
   );
