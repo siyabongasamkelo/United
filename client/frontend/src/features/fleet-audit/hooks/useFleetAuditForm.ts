@@ -1,11 +1,22 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUser } from "../../users/context/UserContext";
 import { FleetAuditService } from "../services/fleetAuditService";
 import { UploadService } from "../../../shared/services/uploadService"; // 🔗 Import Cloudinary pipe
+import { api } from "../../../shared/api/axiosInstance"; // ⚡ Imported to pull your custom branch endpoint directly
+
+// Simple local type definition matching your backend Store interface
+interface IBranchStoreOption {
+  _id: string;
+  name: string;
+  storeCode: string;
+}
 
 export function useFleetAuditForm() {
   const { currentUser } = useUser();
-  const storeOptions = currentUser?.assignedStores || [];
+
+  // 🆕 CHANGED: Turned storeOptions into a reactive state array populated directly by the database API
+  const [storeOptions, setStoreOptions] = useState<IBranchStoreOption[]>([]);
+  const [isLoadingStores, setIsLoadingStores] = useState<boolean>(false);
 
   // 💾 HTML Input reference hook to trigger hidden file dialogs cleanly
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -25,6 +36,33 @@ export function useFleetAuditForm() {
     type: "success" | "error";
     msg: string;
   } | null>(null);
+
+  // 🆕 EFFORTLESS TRIGGER: Pull matching branch locations automatically on initialization
+  useEffect(() => {
+    if (currentUser?.branchId) {
+      fetchBranchStores();
+    }
+  }, [currentUser]);
+
+  const fetchBranchStores = async () => {
+    setIsLoadingStores(true);
+    try {
+      // 🛰️ Fires straight into your clean new endpoint router
+      const response = await api.get<{
+        success: boolean;
+        data: IBranchStoreOption[];
+      }>("/stores/my-branch-stores");
+      setStoreOptions(response.data.data);
+    } catch (err: any) {
+      console.error("Failed loading branch inventory mapping:", err);
+      setFeedback({
+        type: "error",
+        msg: "Failed to dynamically populate store dropdown selection choices.",
+      });
+    } finally {
+      setIsLoadingStores(false);
+    }
+  };
 
   /**
    * Intercepts local browser file selections and streams them straight to Cloudinary
@@ -88,8 +126,8 @@ export function useFleetAuditForm() {
       const result = await FleetAuditService.submitAudit({
         auditDate: new Date().toISOString(),
         store: selectedStore.storeId,
-        branch: "651f1234567890abcdef0002",
-        company: "651f1234567890abcdef0003", // Shared corporate organization reference fallback [1.1]
+        branch: currentUser.branchId || "651f1234567890abcdef0002", // Dynamically bound straight from the profile context node!
+        company: "651f1234567890abcdef0003", // Shared corporate organization reference fallback
         metrics: { total, damaged, dirty },
         images: uploadedImages, // Array of actual live Cloudinary HTTPS string urls passed seamlessly!
         notes: notes.trim() || undefined,
@@ -119,7 +157,8 @@ export function useFleetAuditForm() {
 
   return {
     currentUser,
-    storeOptions,
+    storeOptions, // Returns the clean, freshly updated, live API options array!
+    isLoadingStores, // Exposing loading flags for layout feedback indicators
     selectedStore,
     setSelectedStore,
     totalCount,

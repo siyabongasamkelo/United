@@ -60,30 +60,22 @@ export default function FleetAuditForm() {
         <Box component="form" onSubmit={f.handleFormSubmit}>
           <Stack spacing={2.5}>
             <Autocomplete
-              // ⚡ If the database array is empty, fall back to a default mock testing store!
-              options={
-                f.storeOptions.length > 0
-                  ? f.storeOptions
-                  : [
-                      {
-                        storeId: "651f1234567890abcdef0001",
-                        storeName: "★ GAME STORE (TESTING FALLBACK)",
-                      },
-                    ]
+              options={f.storeOptions}
+              getOptionLabel={(opt) => opt.name} // ⚡ Clean label mapped to the literal Mongo name field!
+              loading={f.isLoadingStores} // Displays clear text spin statuses to workers automatically
+              value={
+                f.storeOptions.find(
+                  (o) => o._id === f.selectedStore?.storeId,
+                ) || null
               }
-              getOptionLabel={(opt) => opt.storeName}
-              value={f.selectedStore}
               onChange={(_, val) => {
                 f.setSelectedStore(
-                  val
-                    ? { storeId: val.storeId, storeName: val.storeName }
-                    : null,
+                  val ? { storeId: val._id, storeName: val.name } : null,
                 );
                 f.setFeedback(null);
               }}
-              // ... keep the rest of the Autocomplete properties exactly the same
-
-              noOptionsText="No retail stores assigned to your profile record."
+              // Keep the rest of your TextField configuration exactly as it sits
+              noOptionsText="No retail stores assigned to your branch boundary terminal record."
               renderInput={(p) => (
                 <TextField
                   {...p}

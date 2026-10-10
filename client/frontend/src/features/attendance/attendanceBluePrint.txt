@@ -1,0 +1,11 @@
+united-trolley-frontend/
+└── src/
+    └── features/
+        ├── fleet-audits/ ... (your existing audit files)
+        └── attendance/  <── 🆕 Create this new feature module folder
+            ├── services/
+            │   └── attendanceService.ts  <── Pure network requests layer
+            ├── hooks/
+            │   └── useAttendanceForm.ts  <── Custom state & GPS logic engine
+            └── components/
+                └── AttendanceConsole.tsx <── 📍 YOUR COMPONENT GOES HERE

@@ -49,6 +49,18 @@ export interface IQuizAttemptResponse {
   attemptDate: string;
 }
 
+export interface ICertificationResponse {
+  _id: string;
+  quizTopic: {
+    _id: string;
+    title: string;
+    hazardLevel: "LOW" | "MEDIUM" | "HIGH";
+  };
+  quizAttempt: string;
+  dateEarned: string;
+  verificationHash: string;
+}
+
 export class SafetyQuizService {
   /**
    * GET: Fetches active questionnaires (Secure: Backend does not include answer keys)
@@ -71,6 +83,17 @@ export class SafetyQuizService {
       success: boolean;
       data: IQuizAttemptResponse;
     }>("/safety-quizzes/submit", payload);
+    return response.data.data;
+  }
+
+  static async getMyCertificates(): Promise<ICertificationResponse[]> {
+    const response = await api.get<{
+      success: boolean;
+      data: ICertificationResponse[];
+    }>("/safety-quizzes/my-logs"); // Reusing your personal history logs which can populate certifications or create a separate backend route if desired
+
+    // Alternative direct endpoint if your backend router introduces /certificates:
+    // const response = await api.get<{ success: boolean; data: ICertificationResponse[] }>("/certificates/my-badges");
     return response.data.data;
   }
 }

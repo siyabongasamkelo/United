@@ -1,0 +1,63 @@
+========================================================================
+📋 BLUEPRINT: UNITED-TROLLEY FRONTEND ARCHITECTURE
+========================================================================
+united-trolley-workspace/
+└── client/
+    └── frontend/
+        ├── public/                     # Static assets, branding, and PWA icons
+        ├── src/
+        │   ├── app/                    # Central routing, styling templates, and root providers
+        │   │   ├── routes.ts           # Central route mapping rules for all features
+        │   │   └── theme.ts            # Material UI global color tokens and component overrides
+        │   │
+        │   ├── components/             # Global layout panels and shared layout wrappers
+        │   │   └── Layout.tsx          # Main viewport sidebar shell with navigation links
+        │   │
+        │   ├── features/               # Sandbox module directory (Feature-Driven Architecture)
+        │   │   ├── academy/            # Learning modules and operator educational training material
+        │   │   │
+        │   │   ├── attendance/          # 🛰️ Time & Attendance, GPS hardware scans, and PPE logs
+        │   │   │   ├── components/
+        │   │   │   │   └── AttendanceConsole.tsx
+        │   │   │   ├── hooks/
+        │   │   │   │   └── useAttendanceForm.ts
+        │   │   │   ├── services/
+        │   │   │   │   └── attendanceService.ts
+        │   │   │   └── AttendancePage.tsx
+        │   │   │
+        │   │   ├── auth/               # Logins, user tracking credentials, and session state guards
+        │   │   ├── checklists/         # Pre-shift inspections and operational task checklists
+        │   │   ├── fix-report/         # Repair pipeline submissions and broken component tickets
+        │   │   │
+        │   │   ├── fleet-audit/        # 📊 Trolley count entries, metrics cards, and condition checks
+        │   │   │   ├── components/
+        │   │   │   │   ├── FleetAuditForm.tsx
+        │   │   │   │   ├── FleetPhotoChip.tsx
+        │   │   │   │   └── StoreAuditCard.tsx
+        │   │   │   ├── data/
+        │   │   │   │   └── mockAudits.ts
+        │   │   │   ├── hooks/
+        │   │   │   │   └── useFleetAuditForm.ts
+        │   │   │   ├── services/
+        │   │   │   │   └── fleetAuditService.ts
+        │   │   │   └── FleetAuditPage.tsx
+        │   │   │
+        │   │   ├── incidents/          # Floor incidents logs (e.g., missing assets, accidents)
+        │   │   ├── safety-quizzes/     # Micro-learning validations for OHS compliance checks
+        │   │   ├── shift-roster/       # Shift scheduling, allocations, and wave timelines
+        │   │   └── users/              # Supervisor and porter account settings profiles
+        │   │
+        │   ├── shared/                 # Infrastructure and global helper classes
+        │   │   ├── api/
+        │   │   │   └── axiosInstance.ts # Configured HTTP pipeline attaching Clerk auth headers
+        │   │   ├── components/         # Tiny cross-feature elements (e.g., standard status icons)
+        │   │   └── services/
+        │   │       └── uploadService.ts # Stream controller feeding files to Cloudinary CDN
+        │   │
+        │   ├── App.tsx                 # Core app tree initializing layout panels
+        │   ├── index.css               # Global base resets and raw brutalist styles
+        │   └── main.tsx                # Central script mounting everything to the browser DOM
+        │
+        ├── .env                        # Local development endpoint secret parameters
+        ├── vite.config.ts              # Custom bundler configurations
+        └── package.json                # Frontend package dependencies mapping

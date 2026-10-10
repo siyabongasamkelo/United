@@ -1,116 +1,241 @@
-import { useState } from "react";
 import {
   Card,
+  CardContent,
   Typography,
+  Box,
   Button,
+  Stack,
   Alert,
-  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
-import { PlayArrow, Stop } from "@mui/icons-material";
-import { useGeoLocation } from "../hooks/useGeoLocation";
+import { AccessTime, Security, Beenhere } from "@mui/icons-material";
+import { useAttendanceForm } from "../hooks/useAttendanceForm";
 
-interface AttendanceConsoleProps {
-  isOnline: boolean; // ✅ TypeScript now sees this is read below!
-  onPunchSuccess: (type: "IN" | "OUT") => void;
-}
-
-export default function AttendanceConsole({
-  isOnline,
-  onPunchSuccess,
-}: AttendanceConsoleProps) {
-  const { getCoordinates, loading, error: gpsError } = useGeoLocation();
-  const [isCheckedIn, setIsCheckedIn] = useState<boolean>(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-
-  const handlePunch = async (type: "IN" | "OUT") => {
-    setValidationError(null);
-    try {
-      await getCoordinates(); // Hardware location check lock
-
-      // Geofence Mock (Gateway Mall Check) [1.1]
-      const userIsAtGateway = true;
-
-      if (!userIsAtGateway) {
-        setValidationError(
-          "Action blocked! You are not within Gateway Mall boundaries.",
-        );
-        return;
-      }
-
-      setIsCheckedIn(type === "IN");
-      onPunchSuccess(type);
-    } catch (err) {
-      // Errors handled gracefully via hook state
-      console.log(err);
-    }
-  };
+export default function AttendanceConsole() {
+  const a = useAttendanceForm();
 
   return (
     <Card
       variant="outlined"
-      sx={{ borderRadius: 3, borderColor: "#e2e8f0", p: 3 }}
+      sx={{
+        borderRadius: 3,
+        borderColor: "#cbd5e1",
+        bgcolor: "#ffffff",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.01)",
+        mb: 4,
+      }}
     >
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Current Status:{" "}
-        <strong>
-          {isCheckedIn ? "ACTIVE ON FLOOR" : "OFF-DUTY / UNASSIGNED"}
-        </strong>
-      </Typography>
+      <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
+        {/* Title Header Section */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <AccessTime sx={{ color: "#4f46e5", fontSize: 24 }} />
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: "900", color: "#1e1b4b", fontSize: "1.1rem" }}
+          >
+            Worker Time & Attendance Portal
+          </Typography>
+        </Box>
 
-      {(gpsError || validationError) && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          {gpsError || validationError}
-        </Alert>
-      )}
+        <Typography
+          variant="caption"
+          sx={{ color: "#64748b", mb: 3, fontWeight: "500", display: "block" }}
+        >
+          Active Operator:{" "}
+          <strong>{a.currentUser?.fullName || "Resolving Profile..."}</strong>
+        </Typography>
 
-      {isCheckedIn ? (
-        <Button
-          variant="contained"
-          color="error"
-          size="large"
-          fullWidth
-          startIcon={
-            loading ? <CircularProgress size={20} color="inherit" /> : <Stop />
-          }
-          disabled={loading}
-          onClick={() => handlePunch("OUT")}
-          sx={{ fontWeight: "800", py: 2, borderRadius: 2 }}
-        >
-          {loading
-            ? "Validating GPS..."
-            : isOnline
-              ? "Clock Out"
-              : "Clock Out (Save Offline)"}
-        </Button>
-      ) : (
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          startIcon={
-            loading ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              <PlayArrow />
-            )
-          }
-          disabled={loading}
-          onClick={() => handlePunch("IN")}
-          sx={{
-            fontWeight: "800",
-            py: 2,
-            borderRadius: 2,
-            bgcolor: "#4f46e5",
-            "&:hover": { bgcolor: "#4338ca" },
-          }}
-        >
-          {loading
-            ? "Locking GPS..."
-            : isOnline
-              ? "Clock In"
-              : "Clock In (Save Offline)"}
-        </Button>
-      )}
+        {a.feedback && (
+          <Alert
+            severity={a.feedback.type}
+            sx={{ mb: 3, borderRadius: 2, fontWeight: "600" }}
+          >
+            {a.feedback.msg}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={a.handleClockInSubmit}>
+          <Stack spacing={3}>
+            {/* Shift Designation Select Inputs */}
+            <FormControl fullWidth size="small" required>
+              <InputLabel id="shift-wave-label">
+                Select Active Shift Wave
+              </InputLabel>
+              <Select
+                labelId="shift-wave-label"
+                value={a.shiftWave}
+                label="Select Active Shift Wave"
+                onChange={(e) => a.setShiftWave(e.target.value)}
+              >
+                <MenuItem value="MORNING">Morning Shift</MenuItem>
+                <MenuItem value="REINFORCEMENT">Reinforcement Shift</MenuItem>
+                <MenuItem value="NIGHT_SWEEPERS">Night Sweepers</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Divider sx={{ borderStyle: "dashed" }} />
+
+            {/* OHS Compliance Declaration Layout Blocks */}
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 1.5,
+                }}
+              >
+                <Security sx={{ color: "#64748b", fontSize: 18 }} />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: "800",
+                    color: "#475569",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Un-skippable PPE & Gear Compliance Check
+                </Typography>
+              </Box>
+
+              <Stack spacing={1}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={a.hasSafetyBoots}
+                      onChange={(e) => a.setHasSafetyBoots(e.target.checked)}
+                      color="success"
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "600", color: "#334155" }}
+                    >
+                      I am wearing steel-toe safety boots [Protective Footwear]
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={a.hasReflectorVest}
+                      onChange={(e) => a.setHasReflectorVest(e.target.checked)}
+                      color="success"
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "600", color: "#334155" }}
+                    >
+                      I am wearing a high-visibility visibility reflector vest
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={a.hasSteeringRope}
+                      onChange={(e) => a.setHasSteeringRope(e.target.checked)}
+                      color="success"
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "600", color: "#334155" }}
+                    >
+                      I have my mandatory 5-trolley control steering rope
+                      present
+                    </Typography>
+                  }
+                />
+              </Stack>
+            </Box>
+
+            {/* Submit Control Action Triggers */}
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={a.isSubmitting || !a.currentUser}
+              endIcon={<Beenhere />}
+              sx={{
+                bgcolor: "#1e1b4b",
+                fontWeight: "800",
+                textTransform: "none",
+                py: 1,
+                borderRadius: 2,
+                "&:hover": { bgcolor: "#2e2a72" },
+              }}
+            >
+              {a.isSubmitting
+                ? "Verifying Geofence & Transmitting..."
+                : "Secure Clock-In Shift"}
+            </Button>
+          </Stack>
+        </Box>
+
+        {/* Shift Logging History Feed Timeline Display */}
+        {a.historyLogs.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: "800",
+                color: "text.secondary",
+                textTransform: "uppercase",
+                display: "block",
+                mb: 1,
+              }}
+            >
+              Your Registered Shift Logs Today
+            </Typography>
+            <List
+              dense
+              sx={{
+                bgcolor: "#f8fafc",
+                borderRadius: 2,
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              {a.historyLogs.map((log) => (
+                <ListItem
+                  key={log._id}
+                  divider
+                  sx={{ "&:last-child": { borderBottom: "none" } }}
+                >
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: "700", color: "#0f172a" }}
+                      >
+                        Shift Wave: {log.shiftWave}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography variant="caption" sx={{ color: "#64748b" }}>
+                        Time: {new Date(log.clockInTime).toLocaleTimeString()}{" "}
+                        &bull; Status: Geofence Locked ✅
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
+      </CardContent>
     </Card>
   );
 }

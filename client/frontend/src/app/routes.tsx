@@ -6,9 +6,10 @@ import FleetAuditPage from "../features/fleet-audit/FleetAuditPage";
 import ShiftRosterPage from "../features/shift-roster/ShiftRosterPage";
 import FixReportPage from "../features/fix-report/FixReportPage";
 import LoginPage from "../features/auth/LoginPage";
-import ShiftAttendancePage from "../features/attendance/ShiftAttendancePage";
+// import ShiftAttendancePage from "../features/attendance/ShiftAttendancePage";
 import ClerkDiagnosticsPage from "../features/auth/ClerkDiagnosticsPage";
 import QuizDashboardPage from "../features/safety-quizzes/QuizDashboardPage";
+import AttendancePage from "../features/attendance/AttendancePage";
 
 // 🔓 THE ROUTE GUARD WRAPPER (DEACTIVATED)
 // This is now an open gateway. It completely ignores Clerk status
@@ -50,7 +51,7 @@ export const router = createBrowserRouter([
     path: "/attendance",
     element: (
       <ProtectedRoute>
-        <ShiftAttendancePage />
+        <AttendancePage />
       </ProtectedRoute>
     ),
   },
