@@ -15,8 +15,17 @@ export class StoreController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      // Pull the branch layout context dynamically from the supervisor's hydrated token profile [4, 8]
+      // ✅ Pull exactly what TypeScript knows exists on your IUser interface
       const branchId = req.user?.branchId;
+
+      if (!branchId) {
+        res.status(400).json({
+          success: false,
+          message:
+            "Auth Token verification failed. Missing active branch assignment context.",
+        });
+        return;
+      }
 
       const stores = await this.storeService.getStoresForBranch(
         String(branchId),
@@ -28,7 +37,7 @@ export class StoreController {
         data: stores,
       });
     } catch (error) {
-      next(error); // Route gracefully straight into the global error handler middleware [4]
+      next(error);
     }
   };
 }

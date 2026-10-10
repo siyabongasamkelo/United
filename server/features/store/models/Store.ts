@@ -1,10 +1,13 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface IStore extends Document {
-  branch: Types.ObjectId; // Ties back to the physical mall boundary
-  name: string; // E.g., "★ GAME STORE"
-  storeCode: string; // E.g., "GM-GATE-01" for absolute auditing
+  branch: Types.ObjectId;
+  name: string;
+  storeCode: string;
   isActive: boolean;
+  // 🆕 NEW OPERATIONAL FIELDS FOR BACKGROUND ALERTS
+  minTrolleyThreshold: number; // E.g., 150
+  managerEmail: string; // E.g., "manager.gamestore@retail.co.za"
 }
 
 export const Store = model<IStore>(
@@ -26,6 +29,8 @@ export const Store = model<IStore>(
         trim: true,
       },
       isActive: { type: Boolean, required: true, default: true },
+      minTrolleyThreshold: { type: Number },
+      managerEmail: { type: String },
     },
     { timestamps: true },
   ),

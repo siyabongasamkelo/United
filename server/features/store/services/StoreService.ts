@@ -9,22 +9,15 @@ export class StoreService {
   }
 
   async getStoresForBranch(branchId: string) {
-    if (!branchId) {
+    // 1. Structural Parameter Gatekeeper
+    if (!branchId || branchId === "undefined") {
       throw createAppError(
         "Branch tracking parameter reference is mandatory.",
         400,
       );
     }
 
-    // Guard Check: Confirm the branch exists in our topology
-    const branchExists = await this.storeRepo.findBranchById(branchId);
-    if (!branchExists) {
-      throw createAppError(
-        "The specified operational branch boundary does not exist.",
-        404,
-      );
-    }
-
+    // ✅ 2. DIRECT EXECUTION: Cut out the extra database hop. Just fetch the stores!
     return await this.storeRepo.findStoresByBranch(branchId);
   }
 }

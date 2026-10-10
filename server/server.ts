@@ -10,6 +10,8 @@ import safteyQuizzesRoutes from "./features/safety-quizzes/routes/quizRoutes";
 import fixReportRoutes from "./features/fix-report/routes/fixReport.routes";
 import { telemetry } from "./shared/telemetry/logger";
 import adminRouter from "./features/store/routes/store.routes";
+import attendanceRouter from "./features/attendance/routes/attendance.routes";
+import storeRouter from "./features/store/routes/store.routes";
 
 // Initialize environment configuration variables
 dotenv.config();
@@ -27,8 +29,10 @@ app.use(requestLogger);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/fleet-audits", fleetAuditRoutes);
 app.use("/api/v1/safety-quizzes", safteyQuizzesRoutes);
-app.use("/api/v1/fix-report", fixReportRoutes);
+app.use("/api/v1/fix-reports", fixReportRoutes);
+app.use("/api/v1/attendance", attendanceRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/stores", storeRouter);
 // A simple system health ping to ensure the server core is running
 app.get("/health", (req, res) => {
   res.status(200).json({

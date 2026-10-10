@@ -1,0 +1,68 @@
+========================================================================
+📋 BLUEPRINT: UNITED-TROLLEY SERVER/BACKEND ARCHITECTURE
+========================================================================
+united-trolley-workspace/
+└── server/
+    ├── src/
+    │   ├── features/                   # Sandbox module directory (Feature-Driven Architecture)
+    │   │   ├── attendance/             # 🛰️ Geofence math routers, controllers, and attendance log schemas
+    │   │   │   ├── controllers/            └── AttendanceController.ts
+    │   │   │   ├── models/                 └── AttendanceLog.ts
+    │   │   │   ├── repositories/           └── AttendanceRepository.ts
+    │   │   │   ├── routes/                 └── attendanceRoutes.ts
+    │   │   │   ├── services/               └── AttendanceService.ts
+    │   │   │   └── validations/            └── attendanceValidation.ts
+    │   │   │
+    │   │   ├── auth/                   # Local session initializers and sync managers
+    │   │   ├── branch/                 # Physical mall boundaries setup data (e.g., Gateway)
+    │   │   ├── company/                # Trolley management and collection contractor directories
+    │   │   ├── fix-report/             # Damaged fleet tracking tickers and repair logs
+    │   │   │
+    │   │   ├── fleet-audit/            # 📊 Shift auditing endpoints, aggregations, and metrics schemas
+    │   │   │   ├── controllers/            └── FleetAuditController.ts
+    │   │   │   ├── models/                 └── FleetAudit.ts
+    │   │   │   ├── repositories/           └── FleetAuditRepository.ts
+    │   │   │   ├── routes/                 └── fleetAuditRoutes.ts
+    │   │   │   ├── services/               └── FleetAuditService.ts
+    │   │   │   └── validations/            └── fleetAuditValidation.ts
+    │   │   │
+    │   │   ├── job-portal/             # Operator internal recruitment, shifts, and open vacancies
+    │   │   ├── quiz-engine/            # Back-end mechanics driving questionnaires and evaluations
+    │   │   ├── safety-quizzes/         # Safety evaluation questionnaires verifying OHS compliance
+    │   │   │
+    │   │   ├── store/                  # 🏢 Branch-scoped retail store directories and repository functions
+    │   │   │   ├── controllers/            └── StoreController.ts
+    │   │   │   ├── models/                 └── Store.ts
+    │   │   │   ├── repositories/           └── StoreRepository.ts
+    │   │   │   ├── routes/                 └── storeRoutes.ts
+    │   │   │   └── services/               └── StoreService.ts
+    │   │   │
+    │   │   ├── tutorials/              # Content streams serving your operator training feature
+    │   │   └── users/                  # User record management schemas and profile directories
+    │   │
+    │   ├── shared/                     # Global infrastructure and security filters
+    │   │   └── middleware/             # 🧠 Centralized interceptors executing before route controllers
+    │   │       ├── authMiddleware.ts       # Hydrates and locks user context safely inside req.user
+    │   │       ├── errorMiddleware.ts      # Captures global pipeline crashes and sends clean responses
+    │   │       ├── loggerMiddleware.ts     # Tracks incoming logs, device descriptors, and performance
+    │   │       ├── rateLimiter.ts          # Defends endpoints from transactional flood attacks
+    │   │       └── validate.middleware.ts  # Standard pipeline parser managing data validation filters
+    │   │
+    │   ├── seeds/                      # Automated local database baseline environment initializers
+    │   │   ├── operationalSeeder.ts    # Populates your branches, retail stores, and target records
+    │   │   ├── runSeeds.ts             # Orchestrates and triggers all environment database seeds
+    │   │   └── seedQuizzes.ts          # Feeds standard questions to your safety quiz indexes
+    │   │
+    │   ├── telemetry/                  # Live execution monitors and application tracker scripts
+    │   │
+    │   ├── utils/                      # Helper libraries and global core layout wrappers
+    │   │   ├── ApiError.ts             # Standard specialized custom error definition maps
+    │   │   ├── logger.ts               # Core terminal output tracker configuration
+    │   │   └── sendEmail.ts            # Outbound email transmission server scripts
+    │   │
+    │   └── index.ts                    # Application base script initializing server pipelines
+    │
+    ├── logs/                           # Auto-generated runtime diagnostic text directories
+    ├── .env                            # Server variables holding database paths and token credentials
+    ├── package-lock.json               # Frozen version mappings for package dependencies
+    └── package.json                    # Central back-end dependency mapping file

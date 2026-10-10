@@ -47,4 +47,22 @@ router.get(
   controller.getBranchMetrics,
 );
 
+// Add these to your existing routes in File 5
+
+// Check for an active session or initialize a brand new one
+router.post(
+  "/start",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.startQuizSession,
+);
+
+// Save an individual answer instantly when the worker clicks next/selects an option
+router.patch(
+  "/save-answer",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.saveLiveAnswer,
+);
+
 export default router;

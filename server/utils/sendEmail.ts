@@ -21,7 +21,7 @@ const transporter: Mail = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async ({
+export const sendEmail = async ({
   to,
   subject,
   html,
@@ -43,4 +43,4 @@ const sendEmail = async ({
   }
 };
 
-export default sendEmail;
+// export default sendEmail;
