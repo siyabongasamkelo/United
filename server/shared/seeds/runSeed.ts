@@ -2,16 +2,14 @@ import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import { runOperationalSeed } from "./operationalSeeder";
+import { runQuizSeed } from "./seedQuizzes";
 
-// 1. Force absolute resolution from the Root Folder where your package.json sits
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 
-// 2. Fetch the Atlas cluster connection string directly from memory
 const ATLAS_CONNECTION_STRING = process.env.MONGO_URI;
 
 async function executeStandaloneSeed() {
   try {
-    // 💡 DIAGNOSTIC SAFETY CHECK: Print out what your environment is seeing
     console.log("🔍 Checking environment variables...");
     if (!ATLAS_CONNECTION_STRING) {
       console.log("❌ ERROR: MONGODB_URI is undefined inside process.env!");
@@ -21,16 +19,21 @@ async function executeStandaloneSeed() {
       );
     }
 
-    // Secure masking for terminal logs
     const maskedUri = ATLAS_CONNECTION_STRING.replace(/:([^:@]+)@/, ":******@");
     console.log(`🔌 Connecting process to MongoDB Atlas: ${maskedUri}`);
 
-    // Connect explicitly using your real cloud cluster string
     await mongoose.connect(ATLAS_CONNECTION_STRING);
     console.log("🔗 Cloud database cluster socket handshaked successfully.");
 
-    // 3. Execute your corporate topology seeder
+    // 🚀 2. Execute corporate topologies first
+    console.log("\n--- STARTING OPERATIONAL SEED ---");
     await runOperationalSeed();
+    console.log("--- OPERATIONAL SEED COMPLETE ---\n");
+
+    // 🚀 3. Execute your training matrices seed second inside the same open pipeline
+    console.log("--- STARTING QUIZ MATRICES SEED ---");
+    await runQuizSeed();
+    console.log("--- QUIZ MATRICES SEED COMPLETE ---\n");
   } catch (error) {
     console.error(
       "❌ Critical runtime seed process failure encountered:",
@@ -38,7 +41,6 @@ async function executeStandaloneSeed() {
     );
     process.exit(1);
   } finally {
-    // 4. Disconnect cleanly so the CLI task finishes completely
     await mongoose.disconnect();
     console.log(
       "🔌 Standalone process disconnected from cloud cluster. Exit code 0.",

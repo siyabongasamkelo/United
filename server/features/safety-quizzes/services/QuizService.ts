@@ -6,15 +6,11 @@ import {
 import { IUserAnswerBreakdown } from "../models/QuizAttempt";
 import { createAppError } from "../../../shared/middleware/errorMiddleware";
 import { telemetry } from "../../../shared/telemetry/logger";
-import crypto from "crypto"; // Native Node library for generating security hashes
-import { Certification } from "../../certificate/models/Certification"; // Import the model
-// ... keep all your existing service imports exactly the same
-import { QuizSession } from "../models/QuizSession"; // Import your new model
-// Add Types here at the top of src/modules/quiz/services/QuizService.ts
+import crypto from "crypto";
+import { Certification } from "../../certificate/models/Certification";
+import { QuizSession } from "../models/QuizSession";
 import { Types } from "mongoose";
-import { QuizTopic, IQuizTopic } from "../models/QuizTopic";
 import type { IQuizAttempt } from "../models/QuizAttempt";
-// import { QuizSession } from "../models/QuizSession"; // Our new model
 
 export class QuizService {
   private quizRepo: QuizRepository;
@@ -29,7 +25,7 @@ export class QuizService {
 
   async processQuizSubmission(
     payload: unknown,
-    localUserId: string,
+    localUserId: string, // This is passed as String(req.user?._id) from Controller
   ): Promise<IQuizAttempt> {
     const startTime = performance.now();
 
@@ -80,9 +76,9 @@ export class QuizService {
 
     // 5. Compile the comprehensive attempt dataset mapping back to your models
     const attemptRecordData: Partial<IQuizAttempt> = {
-      user: localUserId as any,
-      store: validatedInput.storeId as any,
-      branch: validatedInput.branchId as any,
+      user: new Types.ObjectId(localUserId), // ✅ Force conversion to pure ObjectId for schema reference validation
+      store: new Types.ObjectId(validatedInput.storeId), // ✅ Ensure matching ObjectId shape
+      branch: new Types.ObjectId(validatedInput.branchId), // ✅ Ensure matching ObjectId shape
       quizTopic: topic._id as any,
       score: correctCount,
       totalQuestions,
@@ -92,28 +88,35 @@ export class QuizService {
       breakdown: breakdownReport,
     };
 
-    // const savedRecord = await this.quizRepo.createAttempt(attemptRecordData);
-
     const savedRecord = await this.quizRepo.createAttempt(attemptRecordData);
+
+    // ✅ Cleanly close out the live quiz session right here after saving the final attempt log
+    await QuizSession.updateOne(
+      {
+        user: new Types.ObjectId(localUserId),
+        quizTopic: topic._id,
+        status: "IN_PROGRESS",
+      },
+      { $set: { status: "COMPLETED" } },
+    );
 
     // 🆕 DIGITAL CERTIFICATE INJECTION HOOK
     if (savedRecord.hasPassed) {
       try {
-        // Generate an un-tamperable verification tracking hash signature string
         const saltString = `${localUserId}-${savedRecord._id}-${Date.now()}`;
         const verificationHash = crypto
           .createHash("sha256")
           .update(saltString)
           .digest("hex");
 
+        // ✅ Confirmed match with Certification model expectations!
         await Certification.create({
-          user: localUserId,
+          user: new Types.ObjectId(localUserId),
           quizAttempt: savedRecord._id,
           quizTopic: topic._id,
           verificationHash: `CERT-OHS-${verificationHash.substring(0, 12).toUpperCase()}`,
         });
 
-        // Update telemetry parameters to inform monitors that a digital badge was locked down
         telemetry.info({
           event: "DIGITAL_COMPLIANCE_CERTIFICATE_ISSUED",
           userId: localUserId,
@@ -121,7 +124,7 @@ export class QuizService {
           hash: verificationHash.substring(0, 12).toUpperCase(),
         });
       } catch (certError) {
-        // Log exception safely so a glitch in the badge engine never halts quiz tracking operations
+        // Safe logging trace so errors are visible in development terminals
         console.error(
           "Non-blocking Certification engine exception:",
           certError,
@@ -129,7 +132,6 @@ export class QuizService {
       }
     }
 
-    // 6. Push explicit telemetry records out via your daily-rotating winston log layout
     telemetry.info({
       event: "SAFETY_QUIZ_COMPLETED",
       attemptId: savedRecord._id,
@@ -159,34 +161,22 @@ export class QuizService {
     storeId: string,
     branchId: string,
   ) {
-    // 1. Look for an ongoing session
     let session = await QuizSession.findOne({
       user: new Types.ObjectId(userId),
       quizTopic: new Types.ObjectId(topicId),
       status: "IN_PROGRESS",
     });
 
-    // 2. If it doesn't exist, build a new session container
     if (!session) {
       session = await QuizSession.create({
-        user: userId,
-        quizTopic: topicId,
-        store: storeId,
-        branch: branchId,
+        user: new Types.ObjectId(userId),
+        quizTopic: new Types.ObjectId(topicId),
+        store: new Types.ObjectId(storeId),
+        branch: new Types.ObjectId(branchId),
         status: "IN_PROGRESS",
         answers: [],
       });
     }
-
-    // Inside processQuizSubmission() in QuizService.ts, right after creating the QuizAttempt:
-    await QuizSession.updateOne(
-      {
-        user: new Types.ObjectId(userId),
-        quizTopic: topicId,
-        status: "IN_PROGRESS",
-      },
-      { $set: { status: "COMPLETED" } },
-    );
 
     return session;
   }
@@ -197,18 +187,11 @@ export class QuizService {
     questionId: string,
     selectedAnswer: string,
   ) {
-    // Dynamically insert or update a specific answer index in our live array
-    const session = await QuizSession.findOneAndUpdate(
-      {
-        user: new Types.ObjectId(userId),
-        quizTopic: new Types.ObjectId(topicId),
-        status: "IN_PROGRESS",
-      },
-      {
-        $set: { lastActiveAt: new Date() },
-      },
-      { new: true },
-    );
+    const session = await QuizSession.findOne({
+      user: new Types.ObjectId(userId),
+      quizTopic: new Types.ObjectId(topicId),
+      status: "IN_PROGRESS",
+    });
 
     if (!session) {
       throw createAppError(
@@ -217,20 +200,21 @@ export class QuizService {
       );
     }
 
-    // Check if the question was already answered previously in the session
+    session.lastActiveAt = new Date();
+
     const existingAnswerIndex = session.answers.findIndex(
       (a) => a.questionId === questionId,
     );
 
+    const formattedAnswer = selectedAnswer.toUpperCase().trim();
+
     if (existingAnswerIndex > -1) {
-      session.answers[existingAnswerIndex].selectedAnswer = selectedAnswer
-        .toUpperCase()
-        .trim();
+      session.answers[existingAnswerIndex].selectedAnswer = formattedAnswer;
       session.answers[existingAnswerIndex].updatedAt = new Date();
     } else {
       session.answers.push({
         questionId,
-        selectedAnswer: selectedAnswer.toUpperCase().trim(),
+        selectedAnswer: formattedAnswer,
         updatedAt: new Date(),
       });
     }

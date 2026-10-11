@@ -1,25 +1,30 @@
-import mongoose from "mongoose";
-import { QuizTopic } from "../../features/safety-quizzes/models/QuizTopic"; // Keep your model path as is
-import dotenv from "dotenv";
-import path from "path"; // ❶ Import the core Node.js path module
-
-// 🚫 REPLACE THE OLD LINE:
-// dotenv.config();
-
-// ❷ FORCE AN ABSOLUTE PATH LOOKUP TO THE ROOT DIRECTORY:
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
-// Keep the connection logic exactly the same underneath, but add a console tracker:
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-  console.error(
-    "🚫 Systems Mismatch: Could not resolve your .env variables. Verify path mappings.",
-  );
-  process.exit(1);
-}
+import { QuizTopic } from "../../features/safety-quizzes/models/QuizTopic"; // Verify this points to your model path
 
 const mockQuizData = [
+  {
+    title: "⚡ DEMO ONLY: Quick Certificate Test",
+    description:
+      "A fast, single-parameter assessment built to test the real-time digital certification rendering pipeline instantly during supervisor walk-throughs.",
+    hazardLevel: "LOW",
+    passingScorePercentage: 100,
+    isActive: true,
+    questions: [
+      {
+        questionId: "DEMO_01",
+        questionText:
+          "Before operating any heavy machinery on the warehouse floor, what is the first requirement?",
+        options: [
+          "A) Start the machine immediately to save operational time constraints.",
+          "B) Put on full required PPE and ensure your immediate workspace is clear of hazards.",
+          "C) Check your phone for any corporate updates or messages.",
+          "D) Wait until half-shift to report compliance checks.",
+        ],
+        correctAnswer: "B",
+        explanation:
+          "Immediate safety boundaries dictate donning mandatory personal protective equipment before interfacing with live equipment stacks.",
+      },
+    ],
+  },
   {
     title: "Manual Material Handling & Lifting",
     description:
@@ -63,7 +68,7 @@ const mockQuizData = [
     description:
       "Operational guidelines for working safely near automated high-pressure cardboard baling presses, electrical shrink wrappers, or loose charging docks.",
     hazardLevel: "HIGH",
-    passingScorePercentage: 100, // Strict legal zero-tolerance requirement
+    passingScorePercentage: 100,
     isActive: true,
     questions: [
       {
@@ -82,35 +87,45 @@ const mockQuizData = [
       },
     ],
   },
+  {
+    title: "Fire Safety & Hazardous Material Spills",
+    description:
+      "Emergency evacuation protocol patterns and safe containment handling requirements for accidental chemical cleaner or warehouse fuel fluid ruptures.",
+    hazardLevel: "HIGH",
+    passingScorePercentage: 80,
+    isActive: true,
+    questions: [
+      {
+        questionId: "FIRE_01",
+        questionText:
+          "When dealing with a localized Class B fire (flammable liquids/greases), which fire extinguisher classification agent is mandatory?",
+        options: [
+          "A) Standard pressurized water extinguisher tanks.",
+          "B) CO2 Carbon Dioxide or Dry Powder chemical suppression arrays.",
+          "C) Throwing a damp cardboard inventory divider over the active flames.",
+          "D) Spraying high-velocity compressed air to scatter the vapor fields.",
+        ],
+        correctAnswer: "B",
+        explanation:
+          "Class B chemical or fluid fires can flare up violently if hit with water. Pressurized CO2 or dry powder chemicals starve the chemical reaction of oxygen safely.",
+      },
+    ],
+  },
 ];
 
-async function seedDatabase() {
-  try {
-    console.log("⏳ Connecting to local MongoDB cluster...");
-    await mongoose.connect(MONGO_URI);
-    console.log("🚀 Connection verified. Purging active QuizTopic records...");
+// 🚀 EXPORT THIS EXPLICITLY INSTEAD OF CONNECTING INTERNALLY
+export async function runQuizSeed(): Promise<void> {
+  console.log("⏳ Purging active QuizTopic records from collection...");
+  await QuizTopic.deleteMany({});
+  console.log("🧹 QuizTopic collection cleared successfully.");
 
-    // ❶ Clean slate execution to avoid duplicate key validation blocks
-    await QuizTopic.deleteMany({});
-    console.log("🧹 Collection cleared successfully.");
+  console.log("🌱 Injecting Quiz expanded matrix data records...");
+  const seededDocs = await QuizTopic.insertMany(mockQuizData);
+  console.log(
+    `✅ Success! Seeded ${seededDocs.length} Compliance Training Matrices.`,
+  );
 
-    // ❷ Inject raw arrays through your Mongoose schema pipelines
-    const seededDocs = await QuizTopic.insertMany(mockQuizData);
-    console.log(
-      `✅ Success! Seeded ${seededDocs.length} Compliance Training Matrices into the database.`,
-    );
-
-    // Verify mapped indices for you to use on frontend tests
-    seededDocs.forEach((doc) => {
-      console.log(`📌 Module: "${doc.title}" -> ID: ${doc._id}`);
-    });
-  } catch (error) {
-    console.error("🚫 Seeding Transaction Pipeline Failed:", error);
-  } finally {
-    console.log("🔒 Disconnecting from cluster logs.");
-    await mongoose.disconnect();
-    process.exit(0);
-  }
+  seededDocs.forEach((doc) => {
+    console.log(`   📌 Module: "${doc.title}" -> ID: ${doc._id}`);
+  });
 }
-
-seedDatabase();
