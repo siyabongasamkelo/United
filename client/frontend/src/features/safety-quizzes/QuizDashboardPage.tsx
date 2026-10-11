@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Divider,
   Stack,
   Typography,
@@ -18,98 +16,67 @@ import type {
 } from "./services/safetyQuizService";
 
 // Feature Subcomponent Blocks
-import QuizQuestionView from "./components/QuizQuestionView";
 import CertificatesList from "./components/CertificatesList";
 import OhsIntroCard from "./components/OhsIntroCard";
 import AssignedQuizGrid from "./components/AssignedQuizGrid";
+// ✅ FIXED: Imported the core production engine wrapper instead of the raw isolated sub-view
+import SafetyQuizEngine from "./components/SafetyQuizEngine";
 
 export default function QuizDashboardPage() {
   const [quizzes, setQuizzes] = useState<IQuizTopicResponse[]>([]);
   const [certificates, setCertificates] = useState<ICertificationResponse[]>(
     [],
   );
-  const [activeQuiz, setActiveQuiz] = useState<IQuizTopicResponse | null>(null);
+  const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  // Re-usable data refresh function so completing a quiz instantly shows the new certificate badge!
+  const refreshDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const [quizData, certData] = await Promise.all([
+        SafetyQuizService.getAvailableQuizzes(),
+        SafetyQuizService.getMyCertificates().catch(() => []),
+      ]);
+      setQuizzes(quizData);
+      setCertificates(certData);
+    } catch (err: any) {
+      setError(err.message || "Failed to sync safety data registers.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        setIsLoading(true);
-        const [quizData, certData] = await Promise.all([
-          SafetyQuizService.getAvailableQuizzes(),
-          SafetyQuizService.getMyCertificates().catch(() => []),
-        ]);
-        setQuizzes(quizData);
-        setCertificates(certData);
-      } catch (err: any) {
-        setError(err.message || "Failed to sync safety data registers.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchDashboardData();
+    refreshDashboardData();
   }, []);
 
-  // Early Return Layout: Interactive Assessment Step View
-  if (activeQuiz) {
-    const totalQuestions = activeQuiz.questions.length;
+  // ✅ FIXED: If a quiz is selected, mount the true multi-stage production audit workspace
+  if (activeQuizId) {
     return (
-      <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: "680px", mx: "auto", mt: 4 }}>
-        <Card
-          variant="outlined"
-          sx={{
-            borderRadius: 3,
-            borderColor: "#cbd5e1",
-            bgcolor: "#ffffff",
-            p: { xs: 1, sm: 2 },
+      <Box sx={{ mt: 2 }}>
+        <SafetyQuizEngine
+          quizTopicId={activeQuizId}
+          onClose={() => {
+            setActiveQuizId(null);
+            refreshDashboardData(); // Refresh logs to draw new badges cleanly instantly!
           }}
-        >
-          <CardContent>
-            {currentStep < totalQuestions && (
-              <QuizQuestionView
-                question={activeQuiz.questions[currentStep]}
-                selectedOption={selectedOption}
-                onSelectOption={setSelectedOption}
-                currentQuestionIndex={currentStep}
-                totalQuestions={totalQuestions}
-                isLastQuestion={currentStep === totalQuestions - 1}
-                onAdvance={() => {
-                  if (currentStep < totalQuestions - 1) {
-                    setCurrentStep((prev) => prev + 1);
-                    setSelectedOption(null);
-                  } else {
-                    alert(
-                      "🎉 Test Check Complete! Transitioning to Signature Canvas next.",
-                    );
-                    setActiveQuiz(null);
-                    setCurrentStep(0);
-                    setSelectedOption(null);
-                  }
-                }}
-              />
-            )}
-          </CardContent>
-        </Card>
-        <Button
-          variant="text"
-          onClick={() => {
-            setActiveQuiz(null);
-            setCurrentStep(0);
-            setSelectedOption(null);
-          }}
-          sx={{
-            mt: 3,
-            color: "#64748b",
-            textTransform: "none",
-            fontWeight: "700",
-          }}
-        >
-          ← Cancel and Return to Dashboard
-        </Button>
+        />
+        <Box sx={{ maxWidth: "680px", mx: "auto", px: { xs: 2, sm: 4 } }}>
+          <Button
+            variant="text"
+            onClick={() => setActiveQuizId(null)}
+            sx={{
+              mt: 1,
+              color: "#64748b",
+              textTransform: "none",
+              fontWeight: "700",
+            }}
+          >
+            ← Abandon Audit and Return to Dashboard
+          </Button>
+        </Box>
       </Box>
     );
   }
@@ -125,7 +92,7 @@ export default function QuizDashboardPage() {
     >
       <OhsIntroCard />
 
-      {isLoading && (
+      {isLoading && !quizzes.length && (
         <Box
           sx={{
             display: "flex",
@@ -148,7 +115,7 @@ export default function QuizDashboardPage() {
         </Alert>
       )}
 
-      {!isLoading && !error && (
+      {(!isLoading || !!quizzes.length) && !error && (
         <>
           <Typography
             variant="subtitle2"
@@ -164,7 +131,11 @@ export default function QuizDashboardPage() {
             Assigned Safety Matrices
           </Typography>
 
-          <AssignedQuizGrid quizzes={quizzes} onSelectQuiz={setActiveQuiz} />
+          {/* ✅ FIXED: Map the grid select triggers straight to the quiz configuration document identifier */}
+          <AssignedQuizGrid
+            quizzes={quizzes}
+            onSelectQuiz={(quiz) => setActiveQuizId(quiz._id)}
+          />
 
           <Divider sx={{ my: 4, borderColor: "#e2e8f0" }} />
 
