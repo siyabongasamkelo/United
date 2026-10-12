@@ -46,7 +46,10 @@ export default function SafetyQuizEngine({
       {/* PROGRESS HEADER TRACKER */}
       {isAnswering && (
         <Box sx={{ mb: 3, px: 0.5 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+          <Stack
+            direction="row"
+            sx={{ mb: 1, justifyContent: "space-between" }}
+          >
             <Typography
               variant="caption"
               sx={{ fontWeight: "800", color: "text.secondary" }}
@@ -100,6 +103,8 @@ export default function SafetyQuizEngine({
               onSelectOption={q.handleOptionSelect}
               onAdvance={q.advanceEngine}
               isLastQuestion={q.currentStep === totalQuestions - 1}
+              currentQuestionIndex={q.currentStep} // Wired up tracking index prop
+              totalQuestions={totalQuestions} // Wired up total length prop
             />
           )}
 

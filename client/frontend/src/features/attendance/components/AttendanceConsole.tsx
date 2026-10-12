@@ -20,8 +20,27 @@ import {
 import { AccessTime, Security, Beenhere } from "@mui/icons-material";
 import { useAttendanceForm } from "../hooks/useAttendanceForm";
 
-export default function AttendanceConsole() {
+interface AttendanceConsoleProps {
+  isOnline: boolean;
+  onPunchSuccess: (punchType: "IN" | "OUT") => void;
+}
+
+export default function AttendanceConsole({
+  isOnline,
+  onPunchSuccess,
+}: AttendanceConsoleProps) {
   const a = useAttendanceForm();
+
+  // ✅ Connects your parent tracking stream directly into your form hook pipeline wrapper
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await a.handleClockInSubmit(e);
+
+    // Automatically trigger visual stream cascades on success
+    if (onPunchSuccess) {
+      onPunchSuccess("IN");
+    }
+  };
 
   return (
     <Card
@@ -35,7 +54,6 @@ export default function AttendanceConsole() {
       }}
     >
       <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
-        {/* Title Header Section */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <AccessTime sx={{ color: "#4f46e5", fontSize: 24 }} />
           <Typography
@@ -46,12 +64,15 @@ export default function AttendanceConsole() {
           </Typography>
         </Box>
 
+        {/* ✅ Actively visualizes your parent online tracking metric inside your workspace text */}
         <Typography
           variant="caption"
           sx={{ color: "#64748b", mb: 3, fontWeight: "500", display: "block" }}
         >
           Active Operator:{" "}
-          <strong>{a.currentUser?.fullName || "Resolving Profile..."}</strong>
+          <strong>{a.currentUser?.fullName || "Resolving Profile..."}</strong>{" "}
+          &bull; Network State:{" "}
+          {isOnline ? "Cloud Active" : "Offline Local Mode"}
         </Typography>
 
         {a.feedback && (
@@ -63,9 +84,8 @@ export default function AttendanceConsole() {
           </Alert>
         )}
 
-        <Box component="form" onSubmit={a.handleClockInSubmit}>
+        <Box component="form" onSubmit={handleFormSubmit}>
           <Stack spacing={3}>
-            {/* Shift Designation Select Inputs */}
             <FormControl fullWidth size="small" required>
               <InputLabel id="shift-wave-label">
                 Select Active Shift Wave
@@ -84,7 +104,6 @@ export default function AttendanceConsole() {
 
             <Divider sx={{ borderStyle: "dashed" }} />
 
-            {/* OHS Compliance Declaration Layout Blocks */}
             <Box>
               <Box
                 sx={{
@@ -163,7 +182,6 @@ export default function AttendanceConsole() {
               </Stack>
             </Box>
 
-            {/* Submit Control Action Triggers */}
             <Button
               type="submit"
               variant="contained"
@@ -185,7 +203,6 @@ export default function AttendanceConsole() {
           </Stack>
         </Box>
 
-        {/* Shift Logging History Feed Timeline Display */}
         {a.historyLogs.length > 0 && (
           <Box sx={{ mt: 4 }}>
             <Typography

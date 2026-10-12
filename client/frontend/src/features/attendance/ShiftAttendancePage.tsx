@@ -134,6 +134,8 @@ export default function ShiftAttendancePage() {
           >
             Roster Control Console
           </Typography>
+
+          {/* MAKE SURE THIS IS THE ONLY INSTANCE AND IT HAS THESE PROPS */}
           <AttendanceConsole
             isOnline={isOnline}
             onPunchSuccess={processPunch}

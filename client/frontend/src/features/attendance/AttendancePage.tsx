@@ -68,7 +68,11 @@ export default function AttendancePage() {
         >
           Shift Terminal Logging
         </Typography>
-        <AttendanceConsole />
+        {/* FIXED: Provided active connection state and fallback handler callback */}
+        <AttendanceConsole
+          isOnline={navigator.onLine}
+          onPunchSuccess={() => {}}
+        />
       </Box>
     </Box>
   );

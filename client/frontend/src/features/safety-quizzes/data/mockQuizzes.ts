@@ -1,4 +1,4 @@
-import { IQuizTopicResponse } from "../services/safetyQuizService";
+import type { IQuizTopicResponse } from "../services/safetyQuizService";
 
 export const mockSafetyQuizzes: IQuizTopicResponse[] = [
   {

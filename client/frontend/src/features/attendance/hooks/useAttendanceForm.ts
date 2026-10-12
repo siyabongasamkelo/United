@@ -80,7 +80,7 @@ export function useAttendanceForm() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const result = await AttendanceService.clockIn({
+          await AttendanceService.clockIn({
             branchId: currentUser.branchId || "651f1234567890abcdef0002", // Safe operational branch binding fallback [1.2]
             shiftWave: shiftWave as any,
             latitude: position.coords.latitude,

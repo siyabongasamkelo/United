@@ -1,5 +1,4 @@
 import {
-  Box,
   Typography,
   Card,
   CardContent,
@@ -55,13 +54,12 @@ export default function CertificatesList({
           typeof cert.quizTopic === "object"
             ? cert.quizTopic?.title
             : "Safety Module Compliant";
-        const riskLevel =
-          typeof cert.quizTopic === "object"
-            ? cert.quizTopic?.hazardLevel
-            : "LOW";
+
+        // REMOVED: unused 'riskLevel' assignment to satisfy TS6133 compiler flag
 
         return (
-          <Grid key={cert._id} xs={12} sm={6} md={4}>
+          // FIXED: Migrated top-level sizing layout parameters to MUI v6 size object API
+          <Grid key={cert._id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               variant="outlined"
               sx={{
