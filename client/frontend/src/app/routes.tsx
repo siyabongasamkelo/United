@@ -1,27 +1,67 @@
-import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import { useClerk } from "@clerk/clerk-react"; // 🎯 Using your proven raw clerk engine hook directly
 import Layout from "../components/Layout";
 import AcademyPage from "../features/academy/AcademyPage";
 import FleetAuditPage from "../features/fleet-audit/FleetAuditPage";
 import ShiftRosterPage from "../features/shift-roster/ShiftRosterPage";
 import FixReportPage from "../features/fix-report/FixReportPage";
 import LoginPage from "../features/auth/LoginPage";
-// import ShiftAttendancePage from "../features/attendance/ShiftAttendancePage";
 import ClerkDiagnosticsPage from "../features/auth/ClerkDiagnosticsPage";
 import QuizDashboardPage from "../features/safety-quizzes/QuizDashboardPage";
 import AttendancePage from "../features/attendance/AttendancePage";
 
-// 🔓 THE ROUTE GUARD WRAPPER (DEACTIVATED)
-// This is now an open gateway. It completely ignores Clerk status
-// and passes the components straight into your layout framework.
+/**
+ * 🛡️ THE SECURE ROUTE GUARD (For Internal Workspace Pages)
+ * Matches the layout pattern: if session and user ID are missing, boot them to login.
+ */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const clerk = useClerk(); // 🔍 Direct access to the low-level session keys
+
+  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id; // 🎯 Your working logic match
+
+  if (!isOperatorLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
   return <Layout>{children}</Layout>;
+};
+
+/**
+ * 🔓 THE REVERSE AUTH GUARD (For the Login Page Only)
+ * Prevents logged-in users from getting trapped on the login screen.
+ */
+const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const clerk = useClerk();
+
+  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
+
+  if (isOperatorLoggedIn) {
+    return <Navigate to="/academy" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+/**
+ * 💡 DYNAMIC HOME PATH INTERCEPTOR
+ * Resolves root layout endpoint navigation conditionally using your proven layout flags.
+ */
+const RootRedirect = () => {
+  const clerk = useClerk();
+
+  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
+
+  return isOperatorLoggedIn ? (
+    <Navigate to="/academy" replace />
+  ) : (
+    <Navigate to="/login" replace />
+  );
 };
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/academy" replace />,
+    element: <RootRedirect />,
   },
   {
     path: "/quiz-test",
@@ -82,9 +122,11 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: (
-      <Layout>
-        <LoginPage />
-      </Layout>
+      <PublicOnlyRoute>
+        <Layout>
+          <LoginPage />
+        </Layout>
+      </PublicOnlyRoute>
     ),
   },
 ]);
