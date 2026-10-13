@@ -1,20 +1,21 @@
 import { Request, Response, NextFunction } from "express";
-import logger from "../utils/logger.js";
+import logger from "../../utils/logger";
 import { ZodError, ZodSchema } from "zod";
 
 export const validate =
-  (schema: ZodSchema) =>
+  (
+    schema: ZodSchema<any>, // ✅ FIXED: Added <any> generic to let TypeScript inspect parsed properties
+  ) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // 🚀 The Architectural Fix: Pass an object containing Express request properties
-      // This matches the z.object({ body, params, query }) structure used across your features!
+      // Pass an object containing Express request properties
       const validatedFields = await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
       });
 
-      // Assign the safely parsed and formatted fields back to the Express request object context
+      // Now TypeScript safely allows reading these properties instead of marking them unknown!
       req.body = validatedFields.body;
       req.query = validatedFields.query;
       req.params = validatedFields.params;
