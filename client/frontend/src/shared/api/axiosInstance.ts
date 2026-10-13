@@ -1,8 +1,14 @@
 import axios from "axios";
 
-// ❶ Create the global Axios client pointing straight to our versioned API entry gateway
+// 💡 DYNAMIC ENVIRONMENT BASE URL LOADER
+// 1. Attempts to read the Vite environment variable first
+// 2. Safely falls back to local host sandbox parameters if no environment config is present
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1";
+
+// ❶ Create the global Axios client pointing straight to our dynamically resolved API gateway
 export const api = axios.create({
-  baseURL: "http://localhost:5000/api/v1", // ⚡ Appended /v1 to match backend route namespaces perfectly
+  baseURL: BASE_URL,
 });
 
 /**
