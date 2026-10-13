@@ -5,7 +5,6 @@ import {
   AccordionSummary,
   AccordionDetails,
   Box,
-  CardMedia,
 } from "@mui/material";
 import { ExpandMore, AssignmentInd } from "@mui/icons-material";
 import { onboardingLessons } from "../data/lessons";
@@ -74,17 +73,7 @@ export default function LessonConsole() {
             <AccordionDetails
               sx={{ bgcolor: "#fcfcfd", borderTop: "1px solid #e2e8f0", p: 0 }}
             >
-              {/* 📸 MUI CARD MEDIA: Only renders/displays visibly when this specific panel is opened */}
-              <CardMedia
-                component="img"
-                height="220"
-                image={lesson.image}
-                alt={lesson.title}
-                sx={{
-                  objectFit: "cover",
-                  borderBottom: "1px solid #e2e8f0",
-                }}
-              />
+              {/* 📸 REMOVED CARD MEDIA CONTAINER TO CLEAN UP DISPLAY GRID */}
 
               {/* Text Descriptions */}
               <Box sx={{ p: { xs: 2.5, sm: 4 } }}>
