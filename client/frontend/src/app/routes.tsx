@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/academy" replace />,
+    element: <Navigate to="/login" replace />,
   },
   {
     path: "/quiz-test",
