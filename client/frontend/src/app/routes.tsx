@@ -9,6 +9,8 @@ import LoginPage from "../features/auth/LoginPage";
 import ClerkDiagnosticsPage from "../features/auth/ClerkDiagnosticsPage";
 import QuizDashboardPage from "../features/safety-quizzes/QuizDashboardPage";
 import AttendancePage from "../features/attendance/AttendancePage";
+import ManagerConsolePage from "../features/manager-console/ManagerConsolePage";
+import StoreScanPage from "../features/store-visits/StoreScanPage";
 
 /**
  * 🛡️ THE SECURE ROUTE GUARD (For Internal Workspace Pages)
@@ -68,6 +70,22 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <QuizDashboardPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/store-visits",
+    element: (
+      <ProtectedRoute>
+        <StoreScanPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/branch-operations",
+    element: (
+      <ProtectedRoute>
+        <ManagerConsolePage />
       </ProtectedRoute>
     ),
   },

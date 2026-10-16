@@ -31,7 +31,6 @@ export default function AssignedQuizGrid({
             : "info";
 
         return (
-          // Fixed by mapping legacy props to the size object api
           <Grid key={quiz._id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               variant="outlined"

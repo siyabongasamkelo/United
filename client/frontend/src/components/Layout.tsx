@@ -28,6 +28,8 @@ const navItems = [
   { label: "Fix Report", path: "/fix-report" },
   { label: "Attendance", path: "/attendance" },
   { label: "Quiz Test", path: "/quiz-test" },
+  { label: "Branch Operations", path: "/branch-operations" },
+  { label: "Store Visits", path: "/store-visits" },
   // { label: "Diagnostics", path: "/diagnostics" },
 ];
 

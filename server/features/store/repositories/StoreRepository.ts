@@ -1,6 +1,7 @@
 import { Store, IStore } from "../models/Store";
-import { Branch } from "../../branch/models/Branch";
-import { Types } from "mongoose"; // ✅ Ensure Types is imported at the top [2, 3]
+import { Branch, IBranch } from "../../branch/models/Branch";
+import { Types } from "mongoose";
+import "../../area/models/Area";
 
 export class StoreRepository {
   /**
@@ -22,5 +23,20 @@ export class StoreRepository {
 
     // ✅ FORCE OBJECTID CASTING HERE AS WELL
     return await Branch.findById(new Types.ObjectId(branchId));
+  }
+
+  async findBranchesByArea(areaId: string): Promise<IBranch[]> {
+    // 1. Validate the incoming hex string format to prevent Mongoose cast errors
+    if (!Types.ObjectId.isValid(areaId)) {
+      return [];
+    }
+
+    // 2. Query the branches collection directly using the cross-imported Branch model
+    return await Branch.find({
+      area: new Types.ObjectId(areaId),
+      isActive: true,
+    })
+      .populate("area", "name leadership.regionalManager.name") // Hydrates parent area data
+      .sort({ name: 1 });
   }
 }

@@ -18,4 +18,26 @@ router.get(
   controller.getBranchStores,
 );
 
+router.get(
+  "/my-branch-stores",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.getBranchStores,
+);
+
+// 2. 🆕 NEW ENDPOINT: Fetches branches falling under an Area Manager's territory constraint
+router.get(
+  "/area-branches",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.getAreaBranches,
+);
+
+router.get(
+  "/branch-deep-dive/:branchId",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.getBranchDeepDiveSummary,
+);
+
 export default router;

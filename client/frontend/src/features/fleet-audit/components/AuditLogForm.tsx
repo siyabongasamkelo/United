@@ -61,8 +61,12 @@ export default function FleetAuditForm() {
           <Stack spacing={2.5}>
             <Autocomplete
               options={f.storeOptions}
-              getOptionLabel={(opt) => opt.name} // ⚡ Clean label mapped to the literal Mongo name field!
-              loading={f.isLoadingStores} // Displays clear text spin statuses to workers automatically
+              loading={f.isLoadingStores}
+              // 🚀 FIXED OPTION LABEL: Displays "★ GAME STORE (Gateway Theatre of Shopping)"
+              getOptionLabel={(opt) =>
+                opt.branch?.name ? `${opt.name} (${opt.branch.name})` : opt.name
+              }
+              // Clean value mapping fallback logic to track items on state refresh cycles
               value={
                 f.storeOptions.find(
                   (o) => o._id === f.selectedStore?.storeId,
@@ -74,7 +78,6 @@ export default function FleetAuditForm() {
                 );
                 f.setFeedback(null);
               }}
-              // Keep the rest of your TextField configuration exactly as it sits
               noOptionsText="No retail stores assigned to your branch boundary terminal record."
               renderInput={(p) => (
                 <TextField
@@ -86,7 +89,6 @@ export default function FleetAuditForm() {
                 />
               )}
             />
-
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <TextField
                 label="Total Trolleys on Floor"
@@ -120,7 +122,6 @@ export default function FleetAuditForm() {
                 slotProps={{ htmlInput: { min: 0 } }}
               />
             </Stack>
-
             <TextField
               label="Inspector Notes / Condition Comments (Optional)"
               variant="outlined"
@@ -133,7 +134,6 @@ export default function FleetAuditForm() {
               placeholder="Provide context..."
               slotProps={{ htmlInput: { maxLength: 500 } }}
             />
-
             {/* 📸 HIDDEN FILE DIALOG COMPONENT & TRIGGER CONTROLS */}
             <Box>
               <input
@@ -178,7 +178,6 @@ export default function FleetAuditForm() {
                 </Stack>
               )}
             </Box>
-
             <Button
               type="submit"
               variant="contained"

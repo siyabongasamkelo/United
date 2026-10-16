@@ -5,14 +5,25 @@ import { UploadService } from "../../../shared/services/uploadService"; // 🔗 
 import { api } from "../../../shared/api/axiosInstance"; // ⚡ Imported to pull your custom branch endpoint directly
 
 // Simple local type definition matching your backend Store interface
+
 interface IBranchStoreOption {
   _id: string;
   name: string;
   storeCode: string;
+  branch: {
+    _id: string;
+    name: string; // E.g., "Gateway Theatre of Shopping"
+    branchCode: string;
+    area?: {
+      _id: string;
+      name: string; // E.g., "KZN Coastal District"
+    };
+  };
 }
 
 export function useFleetAuditForm() {
   const { currentUser } = useUser();
+  console.log("current user", currentUser);
 
   // 🆕 CHANGED: Turned storeOptions into a reactive state array populated directly by the database API
   const [storeOptions, setStoreOptions] = useState<IBranchStoreOption[]>([]);
@@ -53,6 +64,7 @@ export function useFleetAuditForm() {
         data: IBranchStoreOption[];
       }>("/stores/my-branch-stores");
       setStoreOptions(response.data.data);
+      console.log("Our store List", response.data);
     } catch (err: any) {
       console.error("Failed loading branch inventory mapping:", err);
       setFeedback({

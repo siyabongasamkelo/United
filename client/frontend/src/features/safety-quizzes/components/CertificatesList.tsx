@@ -14,6 +14,7 @@ import {
   Key,
 } from "@mui/icons-material";
 import type { ICertificationResponse } from "../services/safetyQuizService";
+import { SafetyQuizService } from "../services/safetyQuizService";
 
 interface CertificatesListProps {
   certificates: ICertificationResponse[];
@@ -49,16 +50,12 @@ export default function CertificatesList({
   return (
     <Grid container spacing={3}>
       {certificates.map((cert) => {
-        // Handle variations of population safely
         const topicTitle =
           typeof cert.quizTopic === "object"
             ? cert.quizTopic?.title
             : "Safety Module Compliant";
 
-        // REMOVED: unused 'riskLevel' assignment to satisfy TS6133 compiler flag
-
         return (
-          // FIXED: Migrated top-level sizing layout parameters to MUI v6 size object API
           <Grid key={cert._id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               variant="outlined"
@@ -69,7 +66,7 @@ export default function CertificatesList({
                 boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
                 position: "relative",
                 overflow: "hidden",
-                borderTop: "4px solid #10b981", // Solid green indicator representing passed compliance boundaries
+                borderTop: "4px solid #10b981",
               }}
             >
               <CardContent sx={{ p: 3 }}>
@@ -149,11 +146,26 @@ export default function CertificatesList({
                   variant="outlined"
                   fullWidth
                   color="success"
-                  onClick={() =>
-                    alert(
-                      `Verification ID: ${cert.verificationHash}\nLogged securely under OHS framework data registries.`,
-                    )
-                  }
+                  onClick={async () => {
+                    try {
+                      const certDetails =
+                        await SafetyQuizService.getCertificateDetails(
+                          cert.quizAttempt,
+                        );
+                      alert(
+                        `✅ VERIFIED COMPLIANCE CREDENTIAL\n\n` +
+                          `Module: ${typeof certDetails.quizTopic === "object" ? certDetails.quizTopic.title : "Safety Passed"}\n` +
+                          `Verification Hash: ${certDetails.verificationHash}\n` +
+                          `Earned on: ${new Date(certDetails.dateEarned).toLocaleDateString()}\n\n` +
+                          `Logged securely under Department of Employment & Labour (OHS Act 85 of 1993).`,
+                      );
+                    } catch (err: any) {
+                      alert(
+                        `Verification ID: ${cert.verificationHash || "CERT-OHS-PENDING"}\n` +
+                          `Logged securely under OHS framework data registries.`,
+                      );
+                    }
+                  }}
                   sx={{
                     fontWeight: "800",
                     textTransform: "none",

@@ -1,11 +1,6 @@
+// 📂 File: src/features/safety-quizzes/hooks/useSafetyQuizEngine.ts
 import { useState, useEffect, useRef } from "react";
 import { useUser } from "../../users/context/UserContext"; // Aligned with user context usage
-// import {
-//   SafetyQuizService,
-//   IQuizTopicResponse,
-//   IQuizAttemptResponse,
-//   IUserSelectionPayload,
-// } from "../services/safetyQuizService";
 
 import { SafetyQuizService } from "../services/safetyQuizService";
 import type {
@@ -162,7 +157,6 @@ export function useSafetyQuizEngine(quizTopicId: string | undefined) {
   };
 
   // 🚀 SUBMIT ENGINE TRANSACTION PIPELINE
-  // 🚀 UPDATE THIS METHOD INSIDE YOUR useSafetyQuizEngine.ts FILE
   const executeFinalSubmission = async () => {
     if (!quizData || !currentUser) return;
     setFeedback(null);
@@ -187,20 +181,17 @@ export function useSafetyQuizEngine(quizTopicId: string | undefined) {
 
     setIsSubmitting(true);
     try {
-      // ✅ FIXED: We ensure we pass valid 24-character ObjectIDs that match your database seeds.
-      // If your currentUser stores real database document IDs inside storeId/branchId, use them directly.
-      // Otherwise, ensure they conform to a real 24-char hex string from your environment.
       const cleanStoreId = currentUser.assignedStores[0]?.storeId;
       const cleanBranchId = currentUser.branchId;
 
       // Fallback safely to a valid hex layout ONLY if current user context is unassigned
       const targetStore =
-        cleanStoreId && cleanStoreId.match(/^[0-9a-fA-F]{24}\$/)
+        cleanStoreId && cleanStoreId.match(/^[0-9a-fA-F]{24}$/)
           ? cleanStoreId
           : "651f1234567890abcdef0001"; // Make sure this exact ID exists in your MongoDB 'stores' collection!
 
       const targetBranch =
-        cleanBranchId && cleanBranchId.match(/^[0-9a-fA-F]{24}\$/)
+        cleanBranchId && cleanBranchId.match(/^[0-9a-fA-F]{24}$/)
           ? cleanBranchId
           : "651f1234567890abcdef0002"; // Make sure this exact ID exists in your MongoDB 'branches' collection!
 

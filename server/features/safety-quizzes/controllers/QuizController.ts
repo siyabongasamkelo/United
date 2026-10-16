@@ -1,6 +1,8 @@
 import { Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../../../shared/middleware/authMiddleware";
 import { QuizService } from "../services/QuizService";
+import { Types } from "mongoose";
+import { Certification } from "../../certificate/models/Certification";
 
 export class QuizController {
   private quizService: QuizService;
@@ -120,6 +122,37 @@ export class QuizController {
       );
 
       res.status(200).json({ success: true, data: session });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // Append this method inside your QuizController class in File 1
+
+  getCertificateByAttempt = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { attemptId } = req.params;
+      const localUserId = req.user?._id;
+
+      // Direct look-up matching your certificate hook structural fields
+      const certificate = await Certification.findOne({
+        user: new Types.ObjectId(String(localUserId)),
+        //  Fixed Clean Line
+        quizAttempt: new Types.ObjectId(String(attemptId)),
+      }).populate("quizTopic", "title description hazardLevel");
+
+      if (!certificate) {
+        res
+          .status(404)
+          .json({ success: false, message: "Certificate records not found." });
+        return;
+      }
+
+      res.status(200).json({ success: true, data: certificate });
     } catch (error) {
       next(error);
     }

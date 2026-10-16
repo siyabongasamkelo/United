@@ -96,4 +96,19 @@ export class SafetyQuizService {
     // const response = await api.get<{ success: boolean; data: ICertificationResponse[] }>("/certificates/my-badges");
     return response.data.data;
   }
+
+  // Add this method inside your SafetyQuizService class in File 10
+
+  /**
+   * GET: Fetches a verified compliance certificate for a specific successful quiz attempt
+   */
+  static async getCertificateDetails(
+    attemptId: string,
+  ): Promise<ICertificationResponse> {
+    const response = await api.get<{
+      success: boolean;
+      data: ICertificationResponse;
+    }>(`/safety-quizzes/certificate/${attemptId}`);
+    return response.data.data;
+  }
 }

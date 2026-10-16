@@ -1,3 +1,4 @@
+// 📂 File: features/attendance/routes/attendanceRoutes.ts
 import express from "express";
 import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
 import { AttendanceController } from "../controllers/AttendanceController";
@@ -9,8 +10,9 @@ const clerkAuth = ClerkExpressRequireAuth() as any;
 
 /**
  * 🛰️ TIME & ATTENDANCE FIELD OPERATIONS
- * POST: Transmits live GPS vectors and un-skippable PPE checklist metrics for secure evaluation
  */
+
+// 1. Clock-In Registration
 router.post(
   "/clock-in",
   clerkAuth,
@@ -18,9 +20,15 @@ router.post(
   controller.processClockIn,
 );
 
-/**
- * GET: Pulls active session tracking history logs matching the calendar timestamp windows
- */
+// 2. 🆕 Clock-Out Registration Gate
+router.post(
+  "/clock-out",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.processClockOut,
+);
+
+// 3. User Daily Tracking History Log Recovery
 router.get(
   "/my-today-logs",
   clerkAuth,

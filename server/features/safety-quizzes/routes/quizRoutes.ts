@@ -65,4 +65,13 @@ router.patch(
   controller.saveLiveAnswer,
 );
 
+// Append this route inside your quizRoutes.ts file in File 5
+
+router.get(
+  "/certificate/:attemptId",
+  clerkAuth,
+  hydrateLocalUser as express.RequestHandler,
+  controller.getCertificateByAttempt,
+);
+
 export default router;

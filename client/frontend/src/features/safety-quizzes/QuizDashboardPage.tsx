@@ -1,4 +1,6 @@
+// 📂 File: src/features/safety-quizzes/QuizDashboardPage.tsx
 import { useState, useEffect } from "react";
+import { useClerk } from "@clerk/clerk-react"; // 🚀 Switch to useClerk to match reference code blueprint
 import {
   Box,
   Button,
@@ -9,20 +11,22 @@ import {
   Alert,
 } from "@mui/material";
 import { CardMembership } from "@mui/icons-material";
+import { api } from "../../shared/api/axiosInstance";
 import { SafetyQuizService } from "./services/safetyQuizService";
 import type {
   IQuizTopicResponse,
   ICertificationResponse,
 } from "./services/safetyQuizService";
 
-// Feature Subcomponent Blocks
 import CertificatesList from "./components/CertificatesList";
 import OhsIntroCard from "./components/OhsIntroCard";
 import AssignedQuizGrid from "./components/AssignedQuizGrid";
-// ✅ FIXED: Imported the core production engine wrapper instead of the raw isolated sub-view
 import SafetyQuizEngine from "./components/SafetyQuizEngine";
 
 export default function QuizDashboardPage() {
+  // 🚀 Use the exact hook instance layout from manager console
+  const clerk = useClerk();
+
   const [quizzes, setQuizzes] = useState<IQuizTopicResponse[]>([]);
   const [certificates, setCertificates] = useState<ICertificationResponse[]>(
     [],
@@ -31,28 +35,47 @@ export default function QuizDashboardPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Re-usable data refresh function so completing a quiz instantly shows the new certificate badge!
-  const refreshDashboardData = async () => {
-    try {
-      setIsLoading(true);
-      const [quizData, certData] = await Promise.all([
-        SafetyQuizService.getAvailableQuizzes(),
-        SafetyQuizService.getMyCertificates().catch(() => []),
-      ]);
-      setQuizzes(quizData);
-      setCertificates(certData);
-    } catch (err: any) {
-      setError(err.message || "Failed to sync safety data registers.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // 🚀 Exact boolean login guard formula from your reference file
+  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
 
   useEffect(() => {
-    refreshDashboardData();
-  }, []);
+    // 🛑 Brick wall guard check matching the reference hook loop
+    if (!isOperatorLoggedIn) {
+      return;
+    }
 
-  // ✅ FIXED: If a quiz is selected, mount the true multi-stage production audit workspace
+    const refreshDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // 🚀 THE BLOCKING HANDSHAKE: Force token extraction from clerk session object
+        if (clerk.session) {
+          const token = await clerk.session.getToken();
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+
+        const [quizData, certData] = await Promise.all([
+          SafetyQuizService.getAvailableQuizzes(),
+          SafetyQuizService.getMyCertificates().catch(() => []),
+        ]);
+
+        setQuizzes(quizData);
+        setCertificates(certData);
+        console.log("quiz data", quizData);
+      } catch (err: any) {
+        console.error("Safety Dashboard Sync failure:", err);
+        setError(err.message || "Failed to sync safety data registers.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    refreshDashboardData();
+    // 🚀 Listen directly to the exact login state value from your reference hook!
+  }, [isOperatorLoggedIn]);
+
+  // If an active questionnaire is selected, mount the production audit workspace
   if (activeQuizId) {
     return (
       <Box sx={{ mt: 2 }}>
@@ -60,7 +83,19 @@ export default function QuizDashboardPage() {
           quizTopicId={activeQuizId}
           onClose={() => {
             setActiveQuizId(null);
-            refreshDashboardData(); // Refresh logs to draw new badges cleanly instantly!
+            if (isOperatorLoggedIn) {
+              setIsLoading(true);
+              Promise.all([
+                SafetyQuizService.getAvailableQuizzes(),
+                SafetyQuizService.getMyCertificates().catch(() => []),
+              ])
+                .then(([quizData, certData]) => {
+                  setQuizzes(quizData);
+                  setCertificates(certData);
+                  setIsLoading(false);
+                })
+                .catch(() => setIsLoading(false));
+            }
           }}
         />
         <Box sx={{ maxWidth: "680px", mx: "auto", px: { xs: 2, sm: 4 } }}>
@@ -81,7 +116,6 @@ export default function QuizDashboardPage() {
     );
   }
 
-  // Primary Landing UI Dashboard
   return (
     <Box
       sx={{
@@ -92,7 +126,8 @@ export default function QuizDashboardPage() {
     >
       <OhsIntroCard />
 
-      {isLoading && !quizzes.length && (
+      {/* Show indicator if either our custom states or Clerk is still initializing */}
+      {(isLoading || !isOperatorLoggedIn) && !quizzes.length && (
         <Box
           sx={{
             display: "flex",
@@ -115,7 +150,7 @@ export default function QuizDashboardPage() {
         </Alert>
       )}
 
-      {(!isLoading || !!quizzes.length) && !error && (
+      {isOperatorLoggedIn && !isLoading && (
         <>
           <Typography
             variant="subtitle2"
@@ -131,7 +166,6 @@ export default function QuizDashboardPage() {
             Assigned Safety Matrices
           </Typography>
 
-          {/* ✅ FIXED: Map the grid select triggers straight to the quiz configuration document identifier */}
           <AssignedQuizGrid
             quizzes={quizzes}
             onSelectQuiz={(quiz) => setActiveQuizId(quiz._id)}

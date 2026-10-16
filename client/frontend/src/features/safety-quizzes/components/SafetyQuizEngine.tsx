@@ -1,3 +1,4 @@
+// 📂 File: src/features/safety-quizzes/components/SafetyQuizEngine.tsx
 import {
   Box,
   Typography,
@@ -25,13 +26,18 @@ export default function SafetyQuizEngine({
 
   if (q.isLoading)
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ p: 4 }}>
-        Loading questionnaire modules...
-      </Typography>
+      <Box sx={{ p: 4, maxWidth: "680px", mx: "auto" }}>
+        <Typography variant="body2" color="text.secondary">
+          Initializing secure compliance matrix parameters...
+        </Typography>
+      </Box>
     );
+
   if (!q.quizData)
     return (
-      <Alert severity="error">Training module could not be verified.</Alert>
+      <Box sx={{ p: 4, maxWidth: "680px", mx: "auto" }}>
+        <Alert severity="error">Training module could not be verified.</Alert>
+      </Box>
     );
 
   const totalQuestions = q.quizData.questions.length;
@@ -43,7 +49,6 @@ export default function SafetyQuizEngine({
 
   return (
     <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: "680px", mx: "auto" }}>
-      {/* PROGRESS HEADER TRACKER */}
       {isAnswering && (
         <Box sx={{ mb: 3, px: 0.5 }}>
           <Stack
@@ -85,15 +90,9 @@ export default function SafetyQuizEngine({
         </Alert>
       )}
 
-      {/* RENDER BOARD CONSOLE */}
       <Card
         variant="outlined"
-        sx={{
-          borderRadius: 3,
-          borderColor: "#cbd5e1",
-          bgcolor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.01)",
-        }}
+        sx={{ borderRadius: 3, borderColor: "#cbd5e1", bgcolor: "#ffffff" }}
       >
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
           {isAnswering && (
@@ -103,8 +102,8 @@ export default function SafetyQuizEngine({
               onSelectOption={q.handleOptionSelect}
               onAdvance={q.advanceEngine}
               isLastQuestion={q.currentStep === totalQuestions - 1}
-              currentQuestionIndex={q.currentStep} // Wired up tracking index prop
-              totalQuestions={totalQuestions} // Wired up total length prop
+              currentQuestionIndex={q.currentStep}
+              totalQuestions={totalQuestions}
             />
           )}
 
