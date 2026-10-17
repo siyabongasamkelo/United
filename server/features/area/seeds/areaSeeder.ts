@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 
 export interface IAreaSeedDependencies {
   companyId: string;
+  sharedAreaId: string;
 }
 
 export async function runAreaSeed(dependencies: IAreaSeedDependencies) {
@@ -17,6 +18,7 @@ export async function runAreaSeed(dependencies: IAreaSeedDependencies) {
 
     const areasToSeed = [
       {
+        _id: new mongoose.Types.ObjectId(dependencies.sharedAreaId),
         company: companyObjectId,
         name: "Gauteng Central",
         areaCode: "REG-GP-01",

@@ -1,6 +1,9 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { useClerk } from "@clerk/clerk-react"; // 🎯 Using your proven raw clerk engine hook directly
-import Layout from "../components/Layout";
+import { useUser } from "../features/users/context/UserContext"; // 🎯 Using your custom profile engine!
+import { Box, CircularProgress } from "@mui/material";
+// import Layout from "../components/Layout";
+import { Layout } from "../components/Layout"; // 💡 FIX: Wrapped in curly braces to match your named export layout
+
 import AcademyPage from "../features/academy/AcademyPage";
 import FleetAuditPage from "../features/fleet-audit/FleetAuditPage";
 import ShiftRosterPage from "../features/shift-roster/ShiftRosterPage";
@@ -11,33 +14,74 @@ import QuizDashboardPage from "../features/safety-quizzes/QuizDashboardPage";
 import AttendancePage from "../features/attendance/AttendancePage";
 import ManagerConsolePage from "../features/manager-console/ManagerConsolePage";
 import StoreScanPage from "../features/store-visits/StoreScanPage";
+import SupervisorConsolePage from "../features/supervisor-console/SupervisorConsolePage";
+
+interface GuardProps {
+  children: React.ReactNode;
+  allowedRoles?: Array<
+    "PORTER" | "SUPERVISOR" | "AREA_MANAGER" | "SYSTEM_ADMIN"
+  >;
+}
 
 /**
- * 🛡️ THE SECURE ROUTE GUARD (For Internal Workspace Pages)
- * Matches the layout pattern: if session and user ID are missing, boot them to login.
+ * 🛡️ THE SECURE ROLE GUARD
+ * Safeguards internal paths by verifying the local database profile role context
  */
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const clerk = useClerk(); // 🔍 Direct access to the low-level session keys
+const ProtectedRoute = ({ children, allowedRoles }: GuardProps) => {
+  const { currentUser, isLoadingProfile } = useUser(); //
 
-  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id; // 🎯 Your working logic match
+  // ⏳ 1. If your database profile fetch is running, show a full-screen loading state
+  if (isLoadingProfile) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "#4f46e5" }} />
+      </Box>
+    );
+  }
 
-  if (!isOperatorLoggedIn) {
+  // 🛑 2. If no MongoDB record was populated, reject and redirect to Login
+  if (!currentUser) {
     return <Navigate to="/login" replace />;
+  }
+
+  // 🚨 3. If a restriction list exists and the user's role doesn't have authorization, bounce them to their dashboard
+  if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
+    if (
+      currentUser.role === "AREA_MANAGER" ||
+      currentUser.role === "SYSTEM_ADMIN"
+    ) {
+      return <Navigate to="/area-operations" replace />;
+    }
+    if (currentUser.role === "SUPERVISOR") {
+      return <Navigate to="/branch-operations" replace />;
+    }
+    return <Navigate to="/academy" replace />;
   }
 
   return <Layout>{children}</Layout>;
 };
 
 /**
- * 🔓 THE REVERSE AUTH GUARD (For the Login Page Only)
- * Prevents logged-in users from getting trapped on the login screen.
+ * 🔓 THE REVERSE AUTH GUARD
  */
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const clerk = useClerk();
+  const { currentUser } = useUser(); //
 
-  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
-
-  if (isOperatorLoggedIn) {
+  if (currentUser) {
+    if (
+      currentUser.role === "AREA_MANAGER" ||
+      currentUser.role === "SYSTEM_ADMIN"
+    )
+      return <Navigate to="/area-operations" replace />;
+    if (currentUser.role === "SUPERVISOR")
+      return <Navigate to="/branch-operations" replace />;
     return <Navigate to="/academy" replace />;
   }
 
@@ -46,18 +90,38 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 /**
  * 💡 DYNAMIC HOME PATH INTERCEPTOR
- * Resolves root layout endpoint navigation conditionally using your proven layout flags.
+ * Reads your user profiles directly and routes people to their precise workplace deck on entry
  */
 const RootRedirect = () => {
-  const clerk = useClerk();
+  const { currentUser, isLoadingProfile } = useUser(); //
 
-  const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
+  if (isLoadingProfile) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "#4f46e5" }} />
+      </Box>
+    );
+  }
 
-  return isOperatorLoggedIn ? (
-    <Navigate to="/academy" replace />
-  ) : (
-    <Navigate to="/login" replace />
-  );
+  if (!currentUser) return <Navigate to="/login" replace />;
+
+  if (
+    currentUser.role === "AREA_MANAGER" ||
+    currentUser.role === "SYSTEM_ADMIN"
+  ) {
+    return <Navigate to="/area-operations" replace />;
+  }
+  if (currentUser.role === "SUPERVISOR") {
+    return <Navigate to="/branch-operations" replace />;
+  }
+  return <Navigate to="/academy" replace />;
 };
 
 export const router = createBrowserRouter([
@@ -66,9 +130,25 @@ export const router = createBrowserRouter([
     element: <RootRedirect />,
   },
   {
+    path: "/branch-operations",
+    element: (
+      <ProtectedRoute allowedRoles={["SUPERVISOR", "SYSTEM_ADMIN"]}>
+        <SupervisorConsolePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/area-operations",
+    element: (
+      <ProtectedRoute allowedRoles={["AREA_MANAGER", "SYSTEM_ADMIN"]}>
+        <ManagerConsolePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/quiz-test",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"]}>
         <QuizDashboardPage />
       </ProtectedRoute>
     ),
@@ -76,24 +156,52 @@ export const router = createBrowserRouter([
   {
     path: "/store-visits",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"]}>
         <StoreScanPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/branch-operations",
-    element: (
-      <ProtectedRoute>
-        <ManagerConsolePage />
       </ProtectedRoute>
     ),
   },
   {
     path: "/academy",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute
+        allowedRoles={["PORTER", "SUPERVISOR", "AREA_MANAGER", "SYSTEM_ADMIN"]}
+      >
         <AcademyPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/attendance",
+    element: (
+      <ProtectedRoute allowedRoles={["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"]}>
+        <AttendancePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/fleet-audit",
+    element: (
+      <ProtectedRoute
+        allowedRoles={["SUPERVISOR", "AREA_MANAGER", "SYSTEM_ADMIN"]}
+      >
+        <FleetAuditPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/fix-report",
+    element: (
+      <ProtectedRoute allowedRoles={["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"]}>
+        <FixReportPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/shift-log",
+    element: (
+      <ProtectedRoute allowedRoles={["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"]}>
+        <ShiftRosterPage />
       </ProtectedRoute>
     ),
   },
@@ -103,38 +211,6 @@ export const router = createBrowserRouter([
       <Layout>
         <ClerkDiagnosticsPage />
       </Layout>
-    ),
-  },
-  {
-    path: "/attendance",
-    element: (
-      <ProtectedRoute>
-        <AttendancePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/fleet-audit",
-    element: (
-      <ProtectedRoute>
-        <FleetAuditPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/fix-report",
-    element: (
-      <ProtectedRoute>
-        <FixReportPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/shift-log",
-    element: (
-      <ProtectedRoute>
-        <ShiftRosterPage />
-      </ProtectedRoute>
     ),
   },
   {
