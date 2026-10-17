@@ -3,6 +3,7 @@ import { FixReport } from "../models/FixReport";
 import mongoose from "mongoose";
 
 export async function runFixReportSeed(dependencies: {
+  branchId: string; // 🚀 Added to tracking dependencies inputs context
   storeGameId: string;
   storeClicksId: string;
 }) {
@@ -19,6 +20,7 @@ export async function runFixReportSeed(dependencies: {
       {
         trolleyId: "UTS-GAT-042",
         storeOrigin: new mongoose.Types.ObjectId(dependencies.storeGameId),
+        branchId: new mongoose.Types.ObjectId(dependencies.branchId), // 🚀 Safely linked to branch model constraint
         brokenComponent: "CASTOR_WHEELS",
         damageSeverity: "HIGH",
         maintenanceStatus: "PENDING_REPAIR",
@@ -29,6 +31,7 @@ export async function runFixReportSeed(dependencies: {
       {
         trolleyId: "UTS-GAT-118",
         storeOrigin: new mongoose.Types.ObjectId(dependencies.storeClicksId),
+        branchId: new mongoose.Types.ObjectId(dependencies.branchId), // 🚀 Safely linked to branch model constraint
         brokenComponent: "CHASSIS_FRAME",
         damageSeverity: "MEDIUM",
         maintenanceStatus: "UNDER_MAINTENANCE",

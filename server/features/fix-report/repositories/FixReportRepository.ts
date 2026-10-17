@@ -7,6 +7,23 @@ export class FixReportRepository {
     return await report.save();
   }
 
+  // Add this method inside your FixReportRepository class
+  async bulkResolveStoreMaintenanceQueue(
+    storeId: string,
+  ): Promise<{ modifiedCount: number }> {
+    const result = await FixReport.updateMany(
+      {
+        storeOrigin: storeId,
+        maintenanceStatus: { $in: ["PENDING_REPAIR", "UNDER_MAINTENANCE"] }, // Target active repair tickets
+      },
+      {
+        $set: { maintenanceStatus: "RESOLVED" },
+      },
+    );
+
+    return { modifiedCount: result.modifiedCount };
+  }
+
   // Returns live queues mapped to frontend components, populating the reporting user and store details cleanly
   async findActiveMaintenanceQueue(): Promise<IFixReport[]> {
     return await FixReport.find({

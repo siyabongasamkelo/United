@@ -3,6 +3,7 @@ import { Schema, model, Document, Types } from "mongoose";
 export interface IFixReport extends Document {
   trolleyId: string; // E.g., "UTS-042" from terminal input profile
   storeOrigin: Types.ObjectId; // Links back to target store context (Game, Dis-Chem, etc.)
+  branchId: Types.ObjectId; // 🚀 Added branch grouping link context
   brokenComponent:
     | "CASTOR_WHEELS"
     | "BACK_GATE"
@@ -30,6 +31,12 @@ const FixReportSchema = new Schema<IFixReport>(
     storeOrigin: {
       type: Schema.Types.ObjectId,
       ref: "Store",
+      required: true,
+      index: true,
+    },
+    branchId: {
+      type: Schema.Types.ObjectId,
+      ref: "Branch", // Assuming your target branch model collection string identifier is 'Branch'
       required: true,
       index: true,
     },

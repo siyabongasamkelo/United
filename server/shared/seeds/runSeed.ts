@@ -12,12 +12,12 @@ import { runStoreSeed } from "../../features/store/seeds/storeSeeder";
 import { runStoreVisitSeed } from "../../features/store-visits/seeds/storeVisitSeeder";
 import { runFleetAuditSeed } from "../../features/fleet-audit/seeds/fleetAuditSeeder";
 import { runFixReportSeed } from "../../features/fix-report/seeds/fixReportSeeder";
+import { runWashReportSeed } from "../../features/wash-report/seeds/washReportSeeder"; // 🚀 Added Wash Report import
 import { runUserSeed } from "../../features/users/seeds/userSeeder";
 import { runAttendanceSeed } from "../../features/attendance/seeds/attendanceSeeder";
 import { runCertificationSeed } from "../../features/certificate/seeds/certificationSeeder";
 import { runCompanySeed } from "../../features/company/seeds/companySeeder";
 import { runSafetyQuizSeed } from "../../features/safety-quizzes/seeds/quizSeeder";
-// import { runAreaSeed } from "../../features/area/seeds/areaSeeder";
 
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 
@@ -136,10 +136,20 @@ async function executeStandaloneSeed() {
     // ❻ Run Feature-Driven Fix Report Defect Lifecycle Seeds
     console.log("--- STARTING FEATURE FIX REPORT SEED ---");
     await runFixReportSeed({
+      branchId: SHARED_IDS.branchGateway, // 🚀 ADD THIS EXACT LINE HERE TO CLEAR THE TS ERROR
       storeGameId: SHARED_IDS.storeGame,
       storeClicksId: SHARED_IDS.storeClicks,
     });
     console.log("--- FEATURE FIX REPORT SEED COMPLETE ---\n");
+
+    // 🌟 RUN THE FEATURE-DRIVEN WASH REPORT PIPELINE SEEDS RIGHT HERE
+    console.log("--- STARTING FEATURE WASH REPORT SEED ---");
+    await runWashReportSeed({
+      branchId: SHARED_IDS.branchGateway,
+      storeGameId: SHARED_IDS.storeGame,
+      storeClicksId: SHARED_IDS.storeClicks,
+    });
+    console.log("--- FEATURE WASH REPORT SEED COMPLETE ---\n");
 
     // ❼ Run Feature-Driven Shift Attendance Logs
     console.log("--- STARTING FEATURE ATTENDANCE SEED ---");

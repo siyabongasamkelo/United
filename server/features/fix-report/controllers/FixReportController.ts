@@ -15,11 +15,13 @@ export class FixReportController {
     next: NextFunction,
   ): Promise<void> => {
     try {
-      // Safely pull the reporting employee ID straight out of the hydrated session profile pipeline context
       const localUserId = req.user?._id;
+      const localBranchId = req.user?.branchId;
+
       const result = await this.fixReportService.processNewFaultReport(
         req.body,
         String(localUserId),
+        String(localBranchId),
       );
 
       res.status(201).json({
@@ -44,6 +46,31 @@ export class FixReportController {
         success: true,
         count: activeQueueList.length,
         data: activeQueueList,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // 🚀 MAKE SURE THIS EXACT NAME IS ADDED INSIDE THE CONTROLLER CLASS
+  resolveStoreQueue = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { storeId } = req.params;
+      const localUserId = req.user?._id;
+
+      const result = await this.fixReportService.resolveStoreMaintenanceQueue(
+        String(storeId),
+        String(localUserId),
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `Successfully transitioned ${result.modifiedCount} defective asset records to RESOLVED status context.`,
+        data: result,
       });
     } catch (error) {
       next(error);

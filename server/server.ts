@@ -13,6 +13,8 @@ import adminRouter from "./features/store/routes/store.routes";
 import attendanceRouter from "./features/attendance/routes/attendance.routes";
 import storeRouter from "./features/store/routes/store.routes";
 import storeVisitRouter from "./features/store-visits/routes/storeVisitRoutes";
+import washReportRoutes from "./features/wash-report/routes/washReportRoutes";
+import managersConsoleRoutes from "./features/managers-console/routes/managersConsole.routes";
 
 // Initialize environment configuration variables
 dotenv.config();
@@ -35,6 +37,8 @@ app.use("/api/v1/attendance", attendanceRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/stores", storeRouter);
 app.use("/api/v1/store-visits", storeVisitRouter);
+app.use("/api/v1/wash-report", washReportRoutes);
+app.use("/api/v1/managers-console", managersConsoleRoutes);
 // A simple system health ping to ensure the server core is running
 app.get("/health", (req, res) => {
   res.status(200).json({
