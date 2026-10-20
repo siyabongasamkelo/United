@@ -1,70 +1,92 @@
+// 📂 File: src/features/supervisor-console/hooks/useSupervisorConsole.ts
 import { useState, useEffect } from "react";
 import { useClerk } from "@clerk/clerk-react";
+import { useUser } from "../../users/context/UserContext"; // 🚀 Imported your global context hook!
 import { ManagerConsoleService } from "../../manager-console/services/managerConsoleService";
-import { api } from "../../../shared/api/axiosInstance";
+import axios from "axios";
+
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1";
 
 export function useSupervisorConsole() {
   const clerk = useClerk();
 
+  // ❶ Read the unified MongoDB user profile directly from your context layer
+  const { currentUser, isLoadingProfile } = useUser();
+
   const [branchMeta, setBranchMeta] = useState<any | null>(null);
   const [liveData, setLiveData] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🚀 Read the supervisor's branch metadata from their Clerk context attributes
-  // Adjust 'publicMetadata' or 'unsafeMetadata' based on where you store the supervisor's branch identity mapping
-  const supervisorBranchId =
-    (clerk.user?.publicMetadata as any)?.branchId || "651f1234567890abcdef0001";
+  // ❷ Safely grab the branch ID mapped to this logged-in supervisor profile
+  const supervisorBranchId = currentUser?.branchId;
 
   useEffect(() => {
     if (supervisorBranchId) {
-      loadSupervisorDashboard();
+      loadSupervisorDashboard(supervisorBranchId);
     }
   }, [supervisorBranchId]);
 
-  const loadSupervisorDashboard = async () => {
-    setIsLoading(true);
+  const loadSupervisorDashboard = async (branchId: string) => {
+    setIsLoadingMetrics(true);
     setError(null);
     try {
-      // ❶ Pull the specific branch configurations & details
-      // We hit your existing endpoint but bypass the list view array context
+      let headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (clerk.session) {
+        const token = await clerk.session.getToken();
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      // ❸ Fetch the branch naming and structural details matching the supervisor's branch context
       const allBranches = await ManagerConsoleService.fetchAreaBranches(
         "651f1234567890abcdef0010",
       );
-      const currentBranch = allBranches.find(
-        (b) => b._id === supervisorBranchId,
-      );
+      const currentBranch = allBranches.find((b) => b._id === branchId);
 
       if (currentBranch) {
         setBranchMeta(currentBranch);
       } else {
-        // Safe placeholder fallback if the specific ID isn't returned in the standard area fetch
         setBranchMeta({
           name: "Assigned Facility Hub Terminal",
           branchCode: "BR-SUPER-01",
         });
       }
 
-      // ❷ Instantly dispatch cross-talk metrics loading request for their branch
-      const detailedMetrics =
-        await ManagerConsoleService.fetchBranchLiveSummary(supervisorBranchId);
-      setLiveData(detailedMetrics);
+      // ❹ Pull the single-table latest dynamic store fleet summaries using our final endpoint
+      const response = await axios.get(
+        `${BASE_URL}/managers-console/summary/${branchId}`,
+        { headers },
+      );
+
+      console.log("managers console", response);
+
+      if (response.data && response.data.data) {
+        setLiveData(response.data.data);
+      } else {
+        setLiveData(null);
+      }
     } catch (err: any) {
       console.error("Supervisor Dashboard Sync failure:", err);
       setError(
-        err.message ||
+        err.response?.data?.message ||
+          err.message ||
           "Failed to synchronize operational metrics for your branch.",
       );
     } finally {
-      setIsLoading(false);
+      setIsLoadingMetrics(false);
     }
   };
 
   return {
     branchMeta,
     liveData,
-    isLoading,
+    // Combine profile hydration state with explicit metrics loading state for smooth UI behavior
+    isLoading: isLoadingProfile || isLoadingMetrics,
     error,
-    refreshDashboard: loadSupervisorDashboard,
+    refreshDashboard: () =>
+      supervisorBranchId && loadSupervisorDashboard(supervisorBranchId),
   };
 }

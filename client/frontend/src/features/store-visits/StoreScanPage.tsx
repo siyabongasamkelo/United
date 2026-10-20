@@ -92,7 +92,7 @@ export default function StoreScanPage() {
               color="info"
               endIcon={<DoubleArrow />}
               disabled={s.isSubmitting || s.isScanning}
-              onClick={() => s.handleDecodedQR("651f1234567890abcdef0010")}
+              onClick={() => s.handleDecodedQR("6ad798b1a760ddaa210e6f2f")}
               sx={{
                 textTransform: "none",
                 fontSize: "0.75rem",

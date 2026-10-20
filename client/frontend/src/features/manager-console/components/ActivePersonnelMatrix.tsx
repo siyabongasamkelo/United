@@ -13,7 +13,7 @@ interface Porter {
   id: string;
   fullName: string;
   role: string;
-  clockInTime: string;
+  clockInTime: string; // Real ISO string context from backend
   phoneNumber: string;
 }
 
@@ -50,69 +50,79 @@ export function ActivePersonnelMatrix({
           </Typography>
         ) : (
           <Stack spacing={2}>
-            {livePorters.map((porter) => (
-              <Card
-                key={porter.id}
-                variant="outlined"
-                sx={{
-                  borderRadius: 2,
-                  borderColor: "#e2e8f0",
-                  bgcolor: "#f8fafc",
-                  "&:hover": { bgcolor: "#f1f5f9" },
-                }}
-              >
-                <Box
+            {livePorters.map((porter) => {
+              // 🚀 Format the raw backend ISO timestamp nicely for the District Director
+              const formattedTime = porter.clockInTime
+                ? new Date(porter.clockInTime).toLocaleTimeString("en-ZA", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Just now";
+
+              return (
+                <Card
+                  key={porter.id}
+                  variant="outlined"
                   sx={{
-                    p: 2,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: 2,
+                    borderRadius: 2,
+                    borderColor: "#e2e8f0",
+                    bgcolor: "#f8fafc",
+                    "&:hover": { bgcolor: "#f1f5f9" },
                   }}
                 >
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: "800", color: "#1e1b4b" }}
-                    >
-                      {porter.fullName}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "#64748b",
-                        fontWeight: "600",
-                        display: "block",
-                      }}
-                    >
-                      Assignment Context: <strong>{porter.role}</strong>
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "#94a3b8", display: "block" }}
-                    >
-                      GPS Verified Clock-In: {porter.clockInTime}
-                    </Typography>
-                  </Box>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<Phone sx={{ fontSize: 16 }} />}
-                    href={`tel:${porter.phoneNumber}`}
+                  <Box
                     sx={{
-                      bgcolor: "#1e1b4b",
-                      fontWeight: "700",
-                      textTransform: "none",
-                      borderRadius: 2,
-                      "&:hover": { bgcolor: "#2e2a72" },
+                      p: 2,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 2,
                     }}
                   >
-                    Call Porter
-                  </Button>
-                </Box>
-              </Card>
-            ))}
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: "800", color: "#1e1b4b" }}
+                      >
+                        {porter.fullName}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "#64748b",
+                          fontWeight: "600",
+                          display: "block",
+                        }}
+                      >
+                        Assignment Context: <strong>{porter.role}</strong>
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "#94a3b8", display: "block" }}
+                      >
+                        GPS Verified Clock-In: {formattedTime}
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Phone sx={{ fontSize: 16 }} />}
+                      href={`tel:${porter.phoneNumber}`}
+                      sx={{
+                        bgcolor: "#1e1b4b",
+                        fontWeight: "700",
+                        textTransform: "none",
+                        borderRadius: 2,
+                        "&:hover": { bgcolor: "#2e2a72" },
+                      }}
+                    >
+                      Call Porter
+                    </Button>
+                  </Box>
+                </Card>
+              );
+            })}
           </Stack>
         )}
       </CardContent>

@@ -1,13 +1,15 @@
+// 📂 File: src/features/attendance/hooks/useStoreScan.ts
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { StoreVisitService } from "../services/storeVisitService";
+import jsQR from "jsqr"; // 🚀 Imported the high-speed pixel text decoder!
 
 export function useStoreScan() {
-  // ⚡ Grab the raw token acquisition engine straight from the edge auth node
   const { getToken } = useAuth();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const requestRef = useRef<number | null>(null); // Tracks the camera animation loop execution frame
 
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -27,7 +29,7 @@ export function useStoreScan() {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: "environment",
+          facingMode: "environment", // Enforces back camera use on mobile layouts
           width: { ideal: 640 },
           height: { ideal: 640 },
         },
@@ -37,6 +39,9 @@ export function useStoreScan() {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         videoRef.current.play();
+
+        // 🚨 START THE LIVE SCANNING DECODER LOOP!
+        requestRef.current = requestAnimationFrame(tick);
       }
     } catch (err: any) {
       console.error("Camera access failed:", err);
@@ -48,7 +53,50 @@ export function useStoreScan() {
     }
   };
 
+  // 🎯 THE LIVE LENS TICK ENGINE: Grabs canvas snapshots of the video stream every frame
+  const tick = () => {
+    if (
+      !videoRef.current ||
+      videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA
+    ) {
+      requestRef.current = requestAnimationFrame(tick);
+      return;
+    }
+
+    const video = videoRef.current;
+
+    // Create an internal memory canvas layout matching the frame size exactly
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // Parse pixels looking for a match container string
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+
+      // If a code is detected and it looks like a valid 24-character Mongo ID payload block
+      if (code && /^[0-9a-fA-F]{24}$/.test(code.data)) {
+        console.log("🎯 QR Match Found in Frame Loop:", code.data);
+        handleDecodedQR(code.data); // Lock it in and fire to backend!
+        return; // Break loop execution cleanly
+      }
+    }
+
+    // Continue scanning next video layout frame structure seamlessly
+    requestRef.current = requestAnimationFrame(tick);
+  };
+
   const stopCamera = () => {
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+      requestRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -56,17 +104,12 @@ export function useStoreScan() {
     setIsScanning(false);
   };
 
-  /**
-   * Triggered immediately when a QR code match is parsed
-   */
   const handleDecodedQR = async (scannedStoreId: string) => {
     stopCamera();
     setIsSubmitting(true);
     setFeedback(null);
 
     try {
-      // 🚀 THE RACE CONDITION FIX: Proactively check if Clerk can yield a token right now.
-      // If the token resolves, Clerk is hydrated and ready. No infinite page lock necessary!
       const activeToken = await getToken();
 
       if (!activeToken) {

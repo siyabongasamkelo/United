@@ -6,14 +6,17 @@ import {
   Typography,
   Stack,
   Divider,
+  Chip,
 } from "@mui/material";
-import { BuildCircle, AccessTime } from "@mui/icons-material";
+import { BuildCircle, AccessTime, Autorenew } from "@mui/icons-material";
 
 interface FleetStatus {
   totalRegistered: number;
   operational: number;
   dirty: number;
   broken: number;
+  lost: number; // 🚀 Added to types configuration context
+  efficiency: number; // 🚀 Added to track efficiency percentage
   lastUpdated: string;
 }
 
@@ -23,11 +26,13 @@ interface FleetIntegrityCardProps {
 
 export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
   const fleetInfo = status || {
-    totalRegistered: 300,
-    operational: 200,
-    dirty: 50,
-    broken: 50,
-    lastUpdated: "Today, 09:45 AM",
+    totalRegistered: 0,
+    operational: 0,
+    dirty: 0,
+    broken: 0,
+    lost: 0,
+    efficiency: 0,
+    lastUpdated: "Not available",
   };
 
   return (
@@ -45,14 +50,42 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
         }}
       >
         <Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-            <BuildCircle sx={{ color: "#f59e0b", fontSize: 20 }} />
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: "900", color: "#1e1b4b" }}
-            >
-              Fleet Integrity Matrix
-            </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <BuildCircle sx={{ color: "#f59e0b", fontSize: 20 }} />
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "900", color: "#1e1b4b" }}
+              >
+                Fleet Integrity Matrix
+              </Typography>
+            </Box>
+
+            {/* 🚀 EFFICIENCY CHIP PLACEMENT */}
+            <Chip
+              icon={
+                <Autorenew
+                  sx={{
+                    fontSize: "14px !important",
+                    color: "#4f46e5 !important",
+                  }}
+                />
+              }
+              label={`${fleetInfo.efficiency}% Efficiency Rate`}
+              sx={{
+                bgcolor: "#eeebff",
+                color: "#4f46e5",
+                fontWeight: "800",
+                borderRadius: 2,
+              }}
+            />
           </Box>
 
           <Stack
@@ -70,7 +103,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
               variant="caption"
               sx={{ fontWeight: "700", color: "text.secondary" }}
             >
-              Total Fleet Units
+              Total Active Stock Units
             </Typography>
           </Stack>
 
@@ -78,6 +111,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
             <Box
               sx={{
                 display: "flex",
+                justifyGroup: "space-between",
                 justifyContent: "space-between",
                 alignItems: "center",
               }}
@@ -86,7 +120,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
                 variant="body2"
                 sx={{ fontWeight: "700", color: "#475569" }}
               >
-                🟢 Ready / Operational
+                🟢 Ready / Usable Operational Fleet
               </Typography>
               <Typography
                 variant="body2"
@@ -96,6 +130,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
               </Typography>
             </Box>
             <Divider sx={{ borderColor: "#f1f5f9" }} />
+
             <Box
               sx={{
                 display: "flex",
@@ -107,7 +142,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
                 variant="body2"
                 sx={{ fontWeight: "700", color: "#475569" }}
               >
-                🟡 Soiled / Wash Queue
+                🟡 Soiled / Wash Queue Active
               </Typography>
               <Typography
                 variant="body2"
@@ -117,6 +152,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
               </Typography>
             </Box>
             <Divider sx={{ borderColor: "#f1f5f9" }} />
+
             <Box
               sx={{
                 display: "flex",
@@ -128,13 +164,39 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
                 variant="body2"
                 sx={{ fontWeight: "700", color: "#475569" }}
               >
-                🔴 Broken / Repairs Detached
+                🔴 Damaged / Repairs Detached
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ fontWeight: "800", color: "#dc2626" }}
               >
                 {fleetInfo.broken} units
+              </Typography>
+            </Box>
+
+            {/* 🚀 NEW VARIANCE FIELD ADDED HERE FOR THE LOST UNITS ROW */}
+            <Divider sx={{ borderColor: "#f1f5f9" }} />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                bgcolor: "#fff1f2",
+                p: 1,
+                borderRadius: 1.5,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "700", color: "#991b1b" }}
+              >
+                ⚠️ Missing / Lost Variance Delta
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "900", color: "#e11d48" }}
+              >
+                {fleetInfo.lost} units
               </Typography>
             </Box>
           </Stack>
@@ -155,7 +217,7 @@ export function FleetIntegrityCard({ status }: FleetIntegrityCardProps) {
             variant="caption"
             sx={{ color: "#64748b", fontWeight: "600" }}
           >
-            Last updated: {fleetInfo.lastUpdated}
+            Last Live Compute Sync: {fleetInfo.lastUpdated}
           </Typography>
         </Box>
       </CardContent>

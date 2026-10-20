@@ -1,9 +1,9 @@
+// 📂 File: src/features/manager-console/hooks/useManagerConsole.ts
 import { useState, useEffect } from "react";
 import { useClerk } from "@clerk/clerk-react";
 import type { IAreaBranchResponse } from "../services/managerConsoleService";
 import axios from "axios";
 
-// 💡 Isolated instance just for this feature desk to protect your global configurations
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1";
 
@@ -23,9 +23,7 @@ export function useManagerConsole(
   const isOperatorLoggedIn = !!clerk.session && !!clerk.user?.id;
 
   useEffect(() => {
-    if (!isOperatorLoggedIn) {
-      return;
-    }
+    if (!isOperatorLoggedIn) return;
     loadConsoleData();
   }, [activeAreaId, isOperatorLoggedIn]);
 
@@ -36,22 +34,16 @@ export function useManagerConsole(
       let headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
-
-      // 🚀 Explicitly fetch the token here to ensure no race conditions happen
       if (clerk.session) {
         const token = await clerk.session.getToken();
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
+        if (token) headers["Authorization"] = `Bearer ${token}`;
       }
 
-      // 💡 Direct clean network request bypassing global interceptors safely
       const response = await axios.get(`${BASE_URL}/stores/area-branches`, {
         params: { areaId: activeAreaId },
         headers,
       });
 
-      // Safely unpack the backend database data dialect layout
       if (response.data && response.data.data) {
         setBranches(response.data.data);
       } else {
@@ -59,50 +51,50 @@ export function useManagerConsole(
       }
     } catch (err: any) {
       console.error("Manager Console Sync failure:", err);
-      // Safely capture message regardless of custom interceptor formatting variations
-      const msg =
+      setError(
         err.response?.data?.message ||
-        err.message ||
-        "Failed to load live provincial terminal data.";
-      setError(msg);
+          err.message ||
+          "Failed to load live provincial terminal data.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 🚀 REDIRECTING THIS CALL TO TARGET THE FINAL BOSS MANAGERS-CONSOLE ENDPOINT
   const loadBranchDetailedSummary = async (branchId: string) => {
     setIsLoadingSummary(true);
     try {
       let headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
-
       if (clerk.session) {
         const token = await clerk.session.getToken();
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
+        if (token) headers["Authorization"] = `Bearer ${token}`;
       }
 
-      // 💡 Direct clean request tracking path parameters explicitly
+      console.log("branchId", branchId);
+
+      // 🎯 Directly targeting the newly created router path gateway on the backend
       const response = await axios.get(
-        `${BASE_URL}/stores/branch-deep-dive/${branchId}`,
+        `${BASE_URL}/managers-console/summary/${branchId}`,
         { headers },
       );
 
-      // Unpack the deep nested data payload context smoothly
+      console.log("managers console", response);
+
       if (response.data && response.data.data) {
         setLiveBranchSummary(response.data.data);
       } else {
         setLiveBranchSummary(null);
       }
     } catch (err: any) {
-      console.error("Failed to load deep-dive data:", err);
-      const msg =
+      console.error("Failed to load managers-console summary data:", err);
+      setError(
         err.response?.data?.message ||
-        err.message ||
-        "Failed to fetch live branch dashboard tracking data.";
-      setError(msg);
+          err.message ||
+          "Failed to fetch live branch console metrics.",
+      );
     } finally {
       setIsLoadingSummary(false);
     }

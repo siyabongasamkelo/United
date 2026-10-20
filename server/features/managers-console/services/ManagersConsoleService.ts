@@ -1,8 +1,6 @@
 import { FleetAudit } from "../../fleet-audit/models/FleetAudit";
-import { FixReport } from "../../fix-report/models/FixReport";
-import { WashReport } from "../../wash-report/models/WashReport";
-import { AttendanceLog } from "../../attendance/models/AttendanceLog"; // 🚀 Added model import
-import { StoreVisit } from "../../store-visits/models/StoreVisit"; // 🚀 Added model import
+import { AttendanceLog } from "../../attendance/models/AttendanceLog";
+import { StoreVisit } from "../../store-visits/models/StoreVisit";
 import { Types } from "mongoose";
 import { telemetry } from "../../../shared/telemetry/logger";
 
@@ -10,117 +8,113 @@ export class ManagersConsoleService {
   async getBranchPerformanceSummary(branchId: any) {
     const startTime = performance.now();
 
-    // Safe Object ID parsing logic for Area Managers
+    // 1. Safe Object ID parsing logic for Area Managers
     const branchObjectId =
       branchId instanceof Types.ObjectId
         ? branchId
         : new Types.ObjectId(String(branchId));
 
-    // Define time window boundaries for today's store sweeps (00:00:00 to 23:59:59)
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const endOfToday = new Date();
-    endOfToday.setHours(23, 59, 59, 999);
+    // ❷ BULLETPROOF AGGREGATION LOOKUP (No more strict daily date windows!)
+    // This finds only the absolute latest audit logged for each individual store in this branch
+    const [latestStoreAudits, livePersonnel] = await Promise.all([
+      FleetAudit.aggregate([
+        // Filter data down strictly to this branch hub
+        { $match: { branch: branchObjectId } },
 
-    // ❶ HIGH-SPEED PARALLEL PACKET GATHERING
-    const [
-      latestAudits,
-      activeBrokenCount,
-      activeDirtyCount,
-      livePersonnel,
-      storeVisitsToday,
-    ] = await Promise.all([
-      // 1. Fleet Audit Macro Metrics
-      FleetAudit.find({ branch: branchObjectId })
-        .sort({ auditDate: -1 })
-        .limit(2)
-        .lean(),
+        // Sort globally so the absolute newest entries bubble straight to the top
+        { $sort: { auditDate: -1, createdAt: -1 } },
 
-      // 2. Fix Reports Count
-      FixReport.countDocuments({
-        branchId: branchObjectId,
-        maintenanceStatus: { $in: ["PENDING_REPAIR", "UNDER_MAINTENANCE"] },
-      }),
-
-      // 3. Wash Reports Count
-      WashReport.countDocuments({
-        branchId: branchObjectId,
-        washStatus: { $in: ["PENDING_WASH", "IN_WASH_BAY"] },
-      }),
-
-      // 4. 🚀 REAL LIVE PERSONNEL LOOKUP WITH POPULATION
-      AttendanceLog.find({
-        branch: branchObjectId,
-        status: "ACTIVE", // Only target porters currently active on the ground
-      })
-        .populate("user", "fullName contactNumber role") // Swapping out user ID hash for real names and phone lines
-        .lean(),
-
-      // 5. 🚀 REAL STORE VISITS PIPELINE: Aggregates counts and lookup store names
-      StoreVisit.aggregate([
-        {
-          $match: {
-            branch: branchObjectId,
-            scannedAt: { $gte: startOfToday, $lte: endOfToday },
-          },
-        },
+        // Group by the unique store identifier and isolate the first (newest) record's snapshot values
         {
           $group: {
-            _id: "$store", // Group by raw store ID first
-            visitsCount: { $sum: 1 }, // Sum up total loops/sweeps
+            _id: "$store",
+            latestAuditId: { $first: "$_id" },
+            auditDate: { $first: "$auditDate" },
+            metrics: { $first: "$metrics" },
+            notes: { $first: "$notes" },
           },
         },
+
+        // Join onto the master 'stores' collection to pull down display names dynamically
         {
           $lookup: {
-            from: "stores", // Query master stores collection to find names
+            from: "stores",
             localField: "_id",
             foreignField: "_id",
             as: "storeDetails",
           },
         },
-        {
-          $unwind: "$storeDetails",
-        },
-        {
-          $project: {
-            _id: 0,
-            id: "$_id",
-            storeName: { $toUpper: "$storeDetails.name" }, // Standardize layout strings
-            visitsCount: 1,
-          },
-        },
+        { $unwind: "$storeDetails" },
       ]),
+
+      // Keep your live porter lookups active so you can track who is on the ground
+      AttendanceLog.find({
+        branch: branchObjectId,
+        status: "ACTIVE",
+      })
+        .populate("user", "fullName contactNumber role")
+        .lean(),
     ]);
 
-    // ❷ DYNAMIC LOST VARIANCE CALCULATION LOGIC
-    const latestAudit =
-      latestAudits && latestAudits.length > 0 ? latestAudits[0] : null;
-    const previousAudit =
-      latestAudits && latestAudits.length > 1 ? latestAudits[1] : null;
+    // ❸ MAP OUT DYNAMIC STORE BLOCKS FOR THE UI GRID
+    // This dynamically builds the dashboard arrays regardless of how many stores are in the branch
+    // ❸ MAP OUT DYNAMIC STORE BLOCKS FOR THE UI GRID
+    const storesData = latestStoreAudits.map((audit: any) => {
+      const currentTotal = audit.metrics?.total || 0;
+      const damagedCount = audit.metrics?.damaged || 0;
+      const dirtyCount = audit.metrics?.dirty || 0;
 
-    const currentTotalCount = latestAudit?.metrics?.total || 0;
-    const previousTotalCount = previousAudit?.metrics?.total || 0;
+      // Calculate operational usable count safely on the fly
+      const operationalCount = Math.max(
+        0,
+        currentTotal - damagedCount - dirtyCount,
+      );
 
-    let lostTrolleysCount = 0;
-    if (previousAudit && currentTotalCount < previousTotalCount) {
-      lostTrolleysCount = previousTotalCount - currentTotalCount;
-    }
+      return {
+        storeId: String(audit._id),
+        auditId: String(audit.latestAuditId),
+        // 💥 FIX: Changed from database syntax to regular JavaScript string uppercase mapping!
+        storeName: String(
+          audit.storeDetails?.name || "Unknown Store",
+        ).toUpperCase(),
+        lastUpdated: audit.auditDate,
+        metrics: {
+          totalRegisteredFleet: currentTotal,
+          operationalUsable: operationalCount,
+          activeDirty: dirtyCount,
+          activeBroken: damagedCount,
+        },
+        notes: audit.notes || "",
+      };
+    });
 
-    // ❸ CORE MATHEMATICAL FORMULA
-    const operationalUsableBuffer = Math.max(
-      0,
-      currentTotalCount -
-        activeDirtyCount -
-        activeBrokenCount -
-        lostTrolleysCount,
+    // ❹ ACCUMULATE GLOBAL HUB TOTALS (For the top executive dashboard cards)
+    const globalMetrics = storesData.reduce(
+      (acc, store) => {
+        acc.totalRegisteredFleet += store.metrics.totalRegisteredFleet;
+        acc.operationalUsable += store.metrics.operationalUsable;
+        acc.activeDirty += store.metrics.activeDirty;
+        acc.activeBroken += store.metrics.activeBroken;
+        return acc;
+      },
+      {
+        totalRegisteredFleet: 0,
+        operationalUsable: 0,
+        activeDirty: 0,
+        activeBroken: 0,
+      },
     );
 
     const fleetEfficiencyRate =
-      currentTotalCount > 0
-        ? Math.round((operationalUsableBuffer / currentTotalCount) * 100)
+      globalMetrics.totalRegisteredFleet > 0
+        ? Math.round(
+            (globalMetrics.operationalUsable /
+              globalMetrics.totalRegisteredFleet) *
+              100,
+          )
         : 0;
 
-    // ❹ SYSTEM MONITORING TELEMETRY LOG ENTRY
+    // ❺ SYSTEM MONITORING TELEMETRY LOG ENTRY
     telemetry.info({
       event: "MANAGERS_CONSOLE_SUMMARY_COMPILED",
       branchId: String(branchObjectId),
@@ -129,24 +123,12 @@ export class ManagersConsoleService {
 
     return {
       branchId: String(branchObjectId),
-      meta: {
-        lastAuditLoggedAt: latestAudit?.createdAt || null,
-        previousAuditLoggedAt: previousAudit?.createdAt || null,
-        hasHistoricalBaseline: !!previousAudit,
-      },
       metrics: {
-        totalRegisteredFleet: currentTotalCount,
-        operationalUsable: operationalUsableBuffer,
-        activeDirty: activeDirtyCount,
-        activeBroken: activeBrokenCount,
-        lostTrolleys: lostTrolleysCount,
+        ...globalMetrics,
         efficiencyRatePercentage: fleetEfficiencyRate,
       },
-      auditHistorySnapshot: {
-        latestAuditTotal: currentTotalCount,
-        previousAuditTotal: previousTotalCount,
-      },
-      // 🚀 REAL DATA: Map the populated Mongoose logs to match frontend dialects safely
+      // Send the dynamic list straight down to the frontend layout mapper loop
+      stores: storesData,
       livePorters: livePersonnel.map((log: any) => ({
         id: String(log._id),
         fullName: log.user?.fullName || "Field Operator",
@@ -157,8 +139,6 @@ export class ManagersConsoleService {
         phoneNumber: log.user?.contactNumber || "N/A",
         clockInTime: log.clockInTime,
       })),
-      // 🚀 REAL DATA: Directly maps the aggregation results array
-      storeVisitsToday: storeVisitsToday,
     };
   }
 }

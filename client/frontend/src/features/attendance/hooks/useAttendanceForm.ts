@@ -1,5 +1,6 @@
+// 📂 File: src/features/attendance/hooks/useAttendanceForm.ts
 import { useState, useEffect } from "react";
-import { useUser } from "../../users/context/UserContext";
+import { useUser } from "../../users/context/UserContext"; // 🚀 Reading your rich MongoDB profile provider
 import { AttendanceService } from "../services/attendanceService";
 import type { IAttendanceLogResponse } from "../services/attendanceService";
 
@@ -48,6 +49,15 @@ export function useAttendanceForm() {
       return;
     }
 
+    // 🚨 ARCHITECTURAL ENFORCEMENT CHECK: Guard against missing assignments
+    if (!currentUser.branchId) {
+      setFeedback({
+        type: "error",
+        msg: "⚠️ Profile Constraint Error: Your profile is not mapped to an active branch facility hub. Contact management.",
+      });
+      return;
+    }
+
     if (!shiftWave) {
       setFeedback({
         type: "error",
@@ -56,7 +66,6 @@ export function useAttendanceForm() {
       return;
     }
 
-    // Direct UI enforcement guarding against compliance checks before API transmission
     if (!hasSafetyBoots || !hasReflectorVest || !hasSteeringRope) {
       setFeedback({
         type: "error",
@@ -67,7 +76,6 @@ export function useAttendanceForm() {
 
     setIsSubmitting(true);
 
-    // Request native browser GPS tracking vectors
     if (!navigator.geolocation) {
       setFeedback({
         type: "error",
@@ -77,11 +85,13 @@ export function useAttendanceForm() {
       return;
     }
 
+    // Enforce high-accuracy hardware geolocation sweeps
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
+          // 🎯 DYNAMIC HOOK LINK: Sending live coords and the dynamic branch assignment string down the pipe!
           await AttendanceService.clockIn({
-            branchId: currentUser.branchId || "651f1234567890abcdef0002", // Safe operational branch binding fallback [1.2]
+            branchId: currentUser.branchId, // ◄ Clean database link! No more hardcoded testing string seeds.
             shiftWave: shiftWave as any,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -94,10 +104,10 @@ export function useAttendanceForm() {
 
           setFeedback({
             type: "success",
-            msg: `🎉 Clock-in confirmed! Verified inside geofence boundary.`,
+            msg: `🎉 Clock-in confirmed! Verified inside your branch geofence perimeter.`,
           });
 
-          // Reset fields and refresh active data log arrays
+          // Reset fields and refresh log history lists
           setShiftWave("");
           setHasSafetyBoots(false);
           setHasReflectorVest(false);
@@ -124,7 +134,7 @@ export function useAttendanceForm() {
         }
         setFeedback({ type: "error", msg: `⚠️ GPS Error: ${errorMsg}` });
       },
-      { enableHighAccuracy: true, timeout: 10000 }, // Enforce high accuracy GPS hardware sweeps
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   };
 

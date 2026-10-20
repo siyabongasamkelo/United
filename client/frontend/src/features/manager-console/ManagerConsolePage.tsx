@@ -1,10 +1,14 @@
 // 📂 File: src/features/manager-console/ManagerConsolePage.tsx
+import { useState } from "react";
 import { Box, Typography, CircularProgress, Alert, Grid } from "@mui/material";
-// import Grid from "@mui/material/Grid2";
 import { useManagerConsole } from "./hooks/useManagerConsole";
 import { ProvincialIntroBanner } from "./components/ProvincialIntroBanner";
 import { TerritoryCard } from "./components/TerritoryCard";
 import BranchLiveMonitor from "./components/BranchLiveMonitor";
+import { AnalyticsConsoleHub } from "./components/analytics/AnalyticsConsoleHub"; // 🚀 Ensure this is imported!
+
+// ❶ Define our rigid explicit string route boundaries
+type ActiveView = "LIST" | "MONITOR" | "ANALYTICS";
 
 export default function ManagerConsolePage() {
   const {
@@ -19,8 +23,19 @@ export default function ManagerConsolePage() {
     clearSelectedBranch,
   } = useManagerConsole();
 
-  // console.log("live branch summary", liveBranchSummary);
-  // console.log("branches", branches);
+  // ❷ Wire up the local view state router
+  const [currentView, setCurrentView] = useState<ActiveView>("LIST");
+
+  const handleSelectBranch = (branchItem: any) => {
+    setSelectedBranch(branchItem);
+    setCurrentView("MONITOR");
+    loadBranchDetailedSummary(branchItem._id);
+  };
+
+  const handleBackToList = () => {
+    clearSelectedBranch();
+    setCurrentView("LIST");
+  };
 
   return (
     <Box
@@ -30,15 +45,8 @@ export default function ManagerConsolePage() {
         mx: "auto",
       }}
     >
-      {/* 🚀 SCREEN STATE VIEW ROUTER */}
-      {selectedBranch ? (
-        <BranchLiveMonitor
-          branchMeta={selectedBranch}
-          liveData={liveBranchSummary}
-          isLoading={isLoadingSummary}
-          onBack={clearSelectedBranch}
-        />
-      ) : (
+      {/* 🔮 STATE GRID A: flagship district inventory index */}
+      {currentView === "LIST" && (
         <Box>
           <ProvincialIntroBanner />
 
@@ -75,18 +83,34 @@ export default function ManagerConsolePage() {
                 <Grid key={branchItem._id} size={{ xs: 12, sm: 6, md: 4 }}>
                   <TerritoryCard
                     branch={branchItem}
-                    onClick={() => {
-                      // ❶ Set metadata state node
-                      setSelectedBranch(branchItem);
-                      // ❷ Instantly dispatch live cross-talk database metrics load request
-                      loadBranchDetailedSummary(branchItem._id);
-                    }}
+                    onClick={() => handleSelectBranch(branchItem)}
                   />
                 </Grid>
               ))}
             </Grid>
           )}
         </Box>
+      )}
+
+      {/* 🔮 STATE GRID B: live operational tracking array console desk */}
+      {currentView === "MONITOR" && selectedBranch && (
+        <BranchLiveMonitor
+          branchMeta={selectedBranch}
+          liveData={liveBranchSummary}
+          isLoading={isLoadingSummary}
+          onBack={handleBackToList}
+          // ❸ Handing down the navigation trigger cleanly right here!
+          onNavigateToAnalytics={() => setCurrentView("ANALYTICS")}
+        />
+      )}
+
+      {/* 🔮 STATE GRID C: deep performance metrics loss analytics deck */}
+      {currentView === "ANALYTICS" && selectedBranch && (
+        <AnalyticsConsoleHub
+          branchMeta={selectedBranch}
+          liveData={liveBranchSummary}
+          onBack={() => setCurrentView("MONITOR")} // Drops back to the monitor block safely
+        />
       )}
     </Box>
   );

@@ -72,13 +72,13 @@ export default function FleetAuditPage() {
           Territory Active Audits
         </Typography>
 
-        <Grid container spacing={3}>
+        {/* <Grid container spacing={3}>
           {mockStoreAudits.map((storeData) => (
             <Grid key={storeData.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <StoreAuditCard audit={storeData} />
             </Grid>
           ))}
-        </Grid>
+        </Grid> */}
       </Box>
 
       {/* ❸ THE SUPERVISOR INTERACTIVE ENTRY INPUT CONSOLE (CLEANLY ACCESSIBLE AT THE BOTTOM) */}

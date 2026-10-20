@@ -28,11 +28,11 @@ const navItems = [
     path: "/academy",
     roles: ["PORTER", "SUPERVISOR", "AREA_MANAGER", "SYSTEM_ADMIN"],
   },
-  {
-    label: "Floor Fix Log",
-    path: "/fix-report",
-    roles: ["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"],
-  },
+  // {
+  //   label: "Floor Fix Log",
+  //   path: "/fix-report",
+  //   roles: ["PORTER", "SUPERVISOR", "SYSTEM_ADMIN"],
+  // },
   // {
   // label: "Roster Log",
   // path: "/shift-log",

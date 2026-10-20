@@ -1,5 +1,6 @@
 // 📂 File: features/attendance/services/AttendanceService.ts
 import { AttendanceRepository } from "../repositories/AttendanceRepository";
+import { Branch } from "../../branch/models/Branch"; // 🚀 Linked your dynamic Branch model context
 import {
   clockInPayloadSchema,
   ClockInInput,
@@ -18,17 +19,29 @@ export class AttendanceService {
     const startTime = performance.now();
     const validatedInput: ClockInInput = clockInPayloadSchema.parse(payload);
 
-    const distanceMeters = this.attendanceRepo.calculateDistanceToGateway(
+    // 1. Fetch the target branch document profile to recover true server coordinate matrices
+    const targetBranch = await Branch.findById(validatedInput.branchId);
+    if (!targetBranch) {
+      throw createAppError(
+        "Operational shift setup failed. Target branch boundary record missing.",
+        404,
+      );
+    }
+
+    // 2. Perform dynamic vector distance calculation mapping
+    const distanceMeters = this.attendanceRepo.calculateDistance(
       validatedInput.latitude,
       validatedInput.longitude,
+      targetBranch.coordinates.latitude,
+      targetBranch.coordinates.longitude,
     );
 
-    const isInsideMallBoundary =
+    const isInsideBoundary =
       distanceMeters <= this.attendanceRepo.getGeofenceThreshold();
 
-    if (!isInsideMallBoundary) {
+    if (!isInsideBoundary) {
       throw createAppError(
-        `Geofence Access Denied: You are physically located ${Math.round(distanceMeters)}m away. You must be within a 200m radius of Gateway Theatre of Shopping to register your shift.`,
+        `Geofence Access Denied: Located ${Math.round(distanceMeters)}m away. Shift profile rules require you to stand within 200m of ${targetBranch.name} to check in.`,
         403,
       );
     }
@@ -37,7 +50,7 @@ export class AttendanceService {
       user: workerUserId as any,
       branch: validatedInput.branchId as any,
       shiftWave: validatedInput.shiftWave,
-      status: "ACTIVE", // 🚀 Explicitly initialize as active
+      status: "ACTIVE",
       latitude: validatedInput.latitude,
       longitude: validatedInput.longitude,
       isGeofenceVerified: true,
@@ -55,9 +68,6 @@ export class AttendanceService {
     return savedLog;
   }
 
-  /**
-   * 🆕 NEW LIFECYCLE HANDLER: Validates position and triggers shift termination
-   */
   async registerClockOut(
     workerUserId: string,
     branchId: string,
@@ -65,15 +75,26 @@ export class AttendanceService {
   ) {
     const startTime = performance.now();
 
-    // Geofence enforcement on clock-out to ensure they are on site
-    const distanceMeters = this.attendanceRepo.calculateDistanceToGateway(
+    // 1. Fetch branch settings for dynamic clock-out boundary validation checks
+    const targetBranch = await Branch.findById(branchId);
+    if (!targetBranch) {
+      throw createAppError(
+        "Shift wrap-up failed. Target branch boundary record missing.",
+        404,
+      );
+    }
+
+    // 2. Enforce structural clock-out geofencing arrays
+    const distanceMeters = this.attendanceRepo.calculateDistance(
       coordinates.latitude,
       coordinates.longitude,
+      targetBranch.coordinates.latitude,
+      targetBranch.coordinates.longitude,
     );
 
     if (distanceMeters > this.attendanceRepo.getGeofenceThreshold()) {
       throw createAppError(
-        `Geofence Access Denied: Cannot clock out. You are located ${Math.round(distanceMeters)}m away from the operational hub footprint.`,
+        `Geofence Access Denied: Cannot clock out. You are located ${Math.round(distanceMeters)}m away from the operational footprint of ${targetBranch.name}.`,
         403,
       );
     }
@@ -106,9 +127,6 @@ export class AttendanceService {
     return await this.attendanceRepo.findPersonalLogsToday(userId);
   }
 
-  /**
-   * 🚀 SYSTEM CROSS-TALK BRIDGE: Feeds your decoupled manager feature flawlessly
-   */
   async getLiveFloorPersonnel(branchId: string) {
     if (!branchId || branchId === "undefined") {
       throw createAppError(

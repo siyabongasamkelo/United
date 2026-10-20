@@ -8,7 +8,7 @@ import type { IFixReportResponse } from "./services/fixReportService";
 export default function FixReportPage() {
   const [queue, setQueue] = useState<IFixReportResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
+  //
   // Re-fetch the live queue indices safely from Atlas cloud on mutations
   const fetchLiveQueue = useCallback(async () => {
     try {

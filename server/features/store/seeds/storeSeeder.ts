@@ -14,10 +14,14 @@ export async function runStoreSeed(dependencies: IStoreSeedDependencies) {
     await Store.deleteMany({});
 
     console.log(
-      "🌱 Injecting core retail storefront entries for Gateway Hub...",
+      "🌱 Injecting core retail storefront entries with dynamic coordinate matrices...",
     );
 
     const branchObjId = new mongoose.Types.ObjectId(dependencies.branchId);
+
+    // 🎯 YOUR EXACT PHYSICAL TESTING COORDINATES IN EMPANGENI!
+    const testLat = -28.764306;
+    const testLng = 31.879661;
 
     const storesToSeed = [
       // 1. GAME GATEWAY (Matches your system-wide SHARED_IDS.storeGame)
@@ -39,8 +43,12 @@ export async function runStoreSeed(dependencies: IStoreSeedDependencies) {
         },
         location: {
           address: "Shop 12, Gateway Shopping Centre, Gateway Boulevard",
-          city: "Midrand",
-          province: "Gauteng",
+          city: "Empangeni",
+          province: "KwaZulu-Natal",
+        },
+        coordinates: {
+          latitude: testLat,
+          longitude: testLng,
         },
       },
       // 2. CLICKS GATEWAY (Matches your system-wide SHARED_IDS.storeClicks)
@@ -62,11 +70,15 @@ export async function runStoreSeed(dependencies: IStoreSeedDependencies) {
         },
         location: {
           address: "Shop 45, Gateway Shopping Centre, Gateway Boulevard",
-          city: "Midrand",
-          province: "Gauteng",
+          city: "Empangeni",
+          province: "KwaZulu-Natal",
+        },
+        coordinates: {
+          latitude: testLat,
+          longitude: testLng,
         },
       },
-      // 3. PICK N PAY GATEWAY (Extra supporting entity for realism)
+      // 3. PICK N PAY GATEWAY HYPER
       {
         branch: branchObjId,
         name: "PICK N PAY GATEWAY HYPER",
@@ -84,15 +96,19 @@ export async function runStoreSeed(dependencies: IStoreSeedDependencies) {
         },
         location: {
           address: "Anchor Complex A, Gateway Shopping Centre",
-          city: "Midrand",
-          province: "Gauteng",
+          city: "Empangeni",
+          province: "KwaZulu-Natal",
+        },
+        coordinates: {
+          latitude: testLat,
+          longitude: testLng,
         },
       },
     ];
 
     const seededStores = await Store.create(storesToSeed);
     console.log(
-      `✅ Success: ${seededStores.length} commercial retail store targets initialized flawlessly.`,
+      `✅ Success: ${seededStores.length} commercial retail store targets initialized with spatial geofence trackers.`,
     );
   } catch (error) {
     console.error("❌ Store Seeder run failed:", error);

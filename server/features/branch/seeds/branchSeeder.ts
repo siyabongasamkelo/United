@@ -1,5 +1,5 @@
 // 📂 File: server/src/features/branch/seeds/branchSeeder.ts
-import { Branch as BranchModel } from "../models/Branch"; // ❶ Aliased to avoid naming collisions
+import { Branch as BranchModel } from "../models/Branch";
 import mongoose from "mongoose";
 
 export interface IBranchSeedDependencies {
@@ -10,10 +10,11 @@ export interface IBranchSeedDependencies {
 export async function runBranchSeed(dependencies: IBranchSeedDependencies) {
   try {
     console.log("🌿 Branch Seeder: Purging operational hub maps...");
-    // ❷ Using the aliased model name safely here
     await BranchModel.deleteMany({});
 
-    console.log("🌱 Injecting realistic commercial logistics branches...");
+    console.log(
+      "🌱 Injecting realistic commercial logistics branches with geofence vectors...",
+    );
 
     const area1 =
       dependencies.areaIds[0] || new mongoose.Types.ObjectId().toString();
@@ -47,6 +48,11 @@ export async function runBranchSeed(dependencies: IBranchSeedDependencies) {
           depotAddress: "Unit 4, Gateway Logistics Park, Old Pretoria Road",
           city: "Midrand",
         },
+        // 🎯 Real Core GPS Matrix Coordinates for Gateway (Umhlanga)
+        coordinates: {
+          latitude: -28.764306,
+          longitude: 31.879661,
+        },
       },
       {
         area: new mongoose.Types.ObjectId(area2),
@@ -67,6 +73,11 @@ export async function runBranchSeed(dependencies: IBranchSeedDependencies) {
         logistics: {
           depotAddress: "12 Sunset Crescent, Umhlanga Ridge",
           city: "Durban",
+        },
+        // 🎯 GPS coordinates for Durban Port operations hub area
+        coordinates: {
+          latitude: -29.8675,
+          longitude: 31.0236,
         },
       },
       {
@@ -89,6 +100,11 @@ export async function runBranchSeed(dependencies: IBranchSeedDependencies) {
           depotAddress: "8 Industrial Way, Montague Gardens",
           city: "Cape Town",
         },
+        // 🎯 GPS coordinates for Cape Town Industrial Way precinct
+        coordinates: {
+          latitude: -33.8792,
+          longitude: 18.5147,
+        },
       },
       {
         area: new mongoose.Types.ObjectId(area1),
@@ -110,13 +126,17 @@ export async function runBranchSeed(dependencies: IBranchSeedDependencies) {
           depotAddress: "99 Hans Strijdom Drive, Randburg",
           city: "Johannesburg",
         },
+        // 🎯 GPS coordinates for Hans Strijdom footprint in Randburg
+        coordinates: {
+          latitude: -26.0936,
+          longitude: 27.9842,
+        },
       },
     ];
 
-    // ❸ Using the aliased model name safely here
     const seededBranches = await BranchModel.create(branchesToSeed);
     console.log(
-      `✅ Success: ${seededBranches.length} logistics operational branches locked into cluster topology.`,
+      `✅ Success: ${seededBranches.length} logistics operational branches locked into cluster topology with dynamic tracking vectors.`,
     );
 
     return seededBranches.map((b) => b._id.toString());

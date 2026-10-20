@@ -7,14 +7,14 @@ export interface IStore extends Document {
   storeCode: string; // E.g., "GM-GAT-01"
   isActive: boolean;
 
-  // 👤 Contact Info
+  // 📞 Contact Info
   manager: {
     name: string;
     email: string;
     phone: string;
   };
 
-  // 📊 Fleet Analytics Bounds
+  // 🛒 Fleet Analytics Bounds
   trolleyConfig: {
     minThreshold: number; // Warning flag if total counts drop below this
     maxCapacity: number; // Safety ceiling to trap typo validation errors
@@ -26,6 +26,12 @@ export interface IStore extends Document {
     address: string;
     city: string;
     province: string; // E.g., "KwaZulu-Natal", "Gauteng"
+  };
+
+  // 🛰️ Geofencing Vector Coordinates
+  coordinates: {
+    latitude: number;
+    longitude: number;
   };
 }
 
@@ -69,6 +75,12 @@ export const Store = model<IStore>(
         address: { type: String, required: true },
         city: { type: String, required: true },
         province: { type: String, required: true },
+      },
+
+      // 🚨 NEW COMPLIANCE GEOFENCE COORDINATE KEYS
+      coordinates: {
+        latitude: { type: Number, required: true },
+        longitude: { type: Number, required: true },
       },
     },
     { timestamps: true },

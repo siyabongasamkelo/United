@@ -7,13 +7,13 @@ export interface IBranch extends Document {
   branchCode: string; // E.g., "BR-GAT-03"
   isActive: boolean;
 
-  // 🏢 Operational Properties
+  // 👷 Operational Properties
   config: {
     branchType: "OPERATIONAL" | "HEADQUARTERS" | "STORAGE";
     hasRepairFacility: boolean; // Flags if this hub can fix broken units on-site
   };
 
-  // 👤 Branch Leadership Contacts
+  // 📞 Branch Leadership Contacts
   contacts: {
     branchManager: {
       name: string;
@@ -21,7 +21,6 @@ export interface IBranch extends Document {
       phone: string;
     };
     opsCoordinator?: {
-      // Optional backup coordinator
       name: string;
       email: string;
       phone: string;
@@ -32,6 +31,12 @@ export interface IBranch extends Document {
   logistics: {
     depotAddress: string;
     city: string;
+  };
+
+  // 🛰️ Geofencing Vector Coordinates
+  coordinates: {
+    latitude: number;
+    longitude: number;
   };
 }
 
@@ -80,6 +85,12 @@ export const Branch = model<IBranch>(
       logistics: {
         depotAddress: { type: String, required: true },
         city: { type: String, required: true },
+      },
+
+      // 🚨 NEW COMPLIANCE GEOFENCE COORDINATE KEYS
+      coordinates: {
+        latitude: { type: Number, required: true },
+        longitude: { type: Number, required: true },
       },
     },
     { timestamps: true },
