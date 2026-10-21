@@ -1,3 +1,4 @@
+// 📂 File: src/features/manager-console/services/ManagersConsoleService.ts
 import { FleetAudit } from "../../fleet-audit/models/FleetAudit";
 import { AttendanceLog } from "../../attendance/models/AttendanceLog";
 import { StoreVisit } from "../../store-visits/models/StoreVisit";
@@ -14,57 +15,81 @@ export class ManagersConsoleService {
         ? branchId
         : new Types.ObjectId(String(branchId));
 
-    // ❷ BULLETPROOF AGGREGATION LOOKUP (No more strict daily date windows!)
-    // This finds only the absolute latest audit logged for each individual store in this branch
-    const [latestStoreAudits, livePersonnel] = await Promise.all([
-      FleetAudit.aggregate([
-        // Filter data down strictly to this branch hub
-        { $match: { branch: branchObjectId } },
+    // Calculate strict dynamic bounds for today's operational shift window
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
 
-        // Sort globally so the absolute newest entries bubble straight to the top
-        { $sort: { auditDate: -1, createdAt: -1 } },
-
-        // Group by the unique store identifier and isolate the first (newest) record's snapshot values
-        {
-          $group: {
-            _id: "$store",
-            latestAuditId: { $first: "$_id" },
-            auditDate: { $first: "$auditDate" },
-            metrics: { $first: "$metrics" },
-            notes: { $first: "$notes" },
+    // ❷ BULLETPROOF HIGH-SPEED PARALLEL MULTI-TABLE LOOKUP GATES
+    // We fetch our fleet balance metrics snapshots, live active rosters, and the performance rankings!
+    const [latestStoreAudits, livePersonnel, porterPerformanceAggregates] =
+      await Promise.all([
+        // A. Fleet Audit Snapshots per unique storefront
+        FleetAudit.aggregate([
+          { $match: { branch: branchObjectId } },
+          { $sort: { auditDate: -1, createdAt: -1 } },
+          {
+            $group: {
+              _id: "$store",
+              latestAuditId: { $first: "$_id" },
+              auditDate: { $first: "$auditDate" },
+              metrics: { $first: "$metrics" },
+              notes: { $first: "$notes" },
+            },
           },
-        },
-
-        // Join onto the master 'stores' collection to pull down display names dynamically
-        {
-          $lookup: {
-            from: "stores",
-            localField: "_id",
-            foreignField: "_id",
-            as: "storeDetails",
+          {
+            $lookup: {
+              from: "stores",
+              localField: "_id",
+              foreignField: "_id",
+              as: "storeDetails",
+            },
           },
-        },
-        { $unwind: "$storeDetails" },
-      ]),
+          { $unwind: "$storeDetails" },
+        ]),
 
-      // Keep your live porter lookups active so you can track who is on the ground
-      AttendanceLog.find({
-        branch: branchObjectId,
-        status: "ACTIVE",
-      })
-        .populate("user", "fullName contactNumber role")
-        .lean(),
-    ]);
+        // B. Live active personnel checked in via the geofence portal
+        AttendanceLog.find({
+          branch: branchObjectId,
+          status: "ACTIVE",
+        })
+          .populate("user", "fullName contactNumber role")
+          .lean(),
 
-    // ❸ MAP OUT DYNAMIC STORE BLOCKS FOR THE UI GRID
-    // This dynamically builds the dashboard arrays regardless of how many stores are in the branch
+        // C. 🎯 NEW EXPOSURE ENGINE: Aggregates chronological store sweeps, totals, and hourly frequency tracking metrics!
+        StoreVisit.aggregate([
+          {
+            $match: {
+              branch: branchObjectId,
+              scannedAt: { $gte: startOfToday, $lte: endOfToday },
+            },
+          },
+          {
+            $group: {
+              _id: "$porter",
+              totalScans: { $sum: 1 },
+              firstScanTime: { $min: "$scannedAt" },
+              lastScanTime: { $max: "$scannedAt" },
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "_id",
+              foreignField: "_id",
+              as: "porterProfile",
+            },
+          },
+          { $unwind: "$porterProfile" },
+        ]),
+      ]);
+
     // ❸ MAP OUT DYNAMIC STORE BLOCKS FOR THE UI GRID
     const storesData = latestStoreAudits.map((audit: any) => {
       const currentTotal = audit.metrics?.total || 0;
       const damagedCount = audit.metrics?.damaged || 0;
       const dirtyCount = audit.metrics?.dirty || 0;
-
-      // Calculate operational usable count safely on the fly
       const operationalCount = Math.max(
         0,
         currentTotal - damagedCount - dirtyCount,
@@ -73,7 +98,6 @@ export class ManagersConsoleService {
       return {
         storeId: String(audit._id),
         auditId: String(audit.latestAuditId),
-        // 💥 FIX: Changed from database syntax to regular JavaScript string uppercase mapping!
         storeName: String(
           audit.storeDetails?.name || "Unknown Store",
         ).toUpperCase(),
@@ -88,7 +112,7 @@ export class ManagersConsoleService {
       };
     });
 
-    // ❹ ACCUMULATE GLOBAL HUB TOTALS (For the top executive dashboard cards)
+    // ❹ ACCUMULATE GLOBAL HUB TOTALS FOR EXECUTIVE METRICS CARDS
     const globalMetrics = storesData.reduce(
       (acc, store) => {
         acc.totalRegisteredFleet += store.metrics.totalRegisteredFleet;
@@ -114,7 +138,33 @@ export class ManagersConsoleService {
           )
         : 0;
 
-    // ❺ SYSTEM MONITORING TELEMETRY LOG ENTRY
+    // ❺ COMPILE THE HOURLY FREQUENCY LEADERBOARD
+    // Loops over the aggregates and calculates dynamic speeds using JavaScript time values
+    const performanceLeaderboard = porterPerformanceAggregates
+      .map((record: any) => {
+        const firstScan = new Date(record.firstScanTime).getTime();
+        const lastScan = new Date(record.lastScanTime).getTime();
+
+        // Calculate active duty time span between their first and last scan in hours
+        // Fallback baseline to 1 hour to prevent dividing by zero errors if they only scanned once
+        const activeDurationHours = Math.max(
+          1,
+          (lastScan - firstScan) / (1000 * 60 * 60),
+        );
+        const calculatedFrequency =
+          Math.round((record.totalScans / activeDurationHours) * 10) / 10;
+
+        return {
+          porterId: String(record._id),
+          fullName: String(record.porterProfile.fullName || "Field Porter"),
+          totalScansToday: record.totalScans,
+          scansPerHour: calculatedFrequency, // 🕒 Live frequency measurement metric calculation!
+          lastScanLoggedAt: record.lastScanTime,
+        };
+      })
+      .sort((a, b) => b.totalScansToday - a.totalScansToday); // Top performers bubble up to the apex naturally!
+
+    // ❻ SYSTEM MONITORING TELEMETRY LOG ENTRY
     telemetry.info({
       event: "MANAGERS_CONSOLE_SUMMARY_COMPILED",
       branchId: String(branchObjectId),
@@ -127,8 +177,9 @@ export class ManagersConsoleService {
         ...globalMetrics,
         efficiencyRatePercentage: fleetEfficiencyRate,
       },
-      // Send the dynamic list straight down to the frontend layout mapper loop
       stores: storesData,
+      // 🚀 EXPOSING TARGET SCANS DIRECTLY DOWN THE DISPATCH PIPE WIRE PAYLOAD CONTRACT
+      porterPerformanceRankings: performanceLeaderboard,
       livePorters: livePersonnel.map((log: any) => ({
         id: String(log._id),
         fullName: log.user?.fullName || "Field Operator",

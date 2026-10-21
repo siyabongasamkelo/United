@@ -58,6 +58,9 @@ export function useAttendanceForm() {
       return;
     }
 
+    // 💡 FIX: Save to a local variable. TypeScript now guarantees this is a strict 'string'
+    const verifiedBranchId = currentUser.branchId;
+
     if (!shiftWave) {
       setFeedback({
         type: "error",
@@ -89,9 +92,9 @@ export function useAttendanceForm() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          // 🎯 DYNAMIC HOOK LINK: Sending live coords and the dynamic branch assignment string down the pipe!
+          // 🎯 DYNAMIC HOOK LINK: Using the guaranteed safe local variable
           await AttendanceService.clockIn({
-            branchId: currentUser.branchId, // ◄ Clean database link! No more hardcoded testing string seeds.
+            branchId: verifiedBranchId, // ◄ No more TS2322 null error!
             shiftWave: shiftWave as any,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,

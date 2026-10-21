@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuizController = void 0;
 const QuizService_1 = require("../services/QuizService");
+const mongoose_1 = require("mongoose");
+const Certification_1 = require("../../certificate/models/Certification");
 class QuizController {
     quizService;
     constructor() {
@@ -73,6 +75,29 @@ class QuizController {
             const { quizTopicId, questionId, selectedAnswer } = req.body;
             const session = await this.quizService.updateLiveAnswer(String(localUserId), quizTopicId, questionId, selectedAnswer);
             res.status(200).json({ success: true, data: session });
+        }
+        catch (error) {
+            next(error);
+        }
+    };
+    // Append this method inside your QuizController class in File 1
+    getCertificateByAttempt = async (req, res, next) => {
+        try {
+            const { attemptId } = req.params;
+            const localUserId = req.user?._id;
+            // Direct look-up matching your certificate hook structural fields
+            const certificate = await Certification_1.Certification.findOne({
+                user: new mongoose_1.Types.ObjectId(String(localUserId)),
+                //  Fixed Clean Line
+                quizAttempt: new mongoose_1.Types.ObjectId(String(attemptId)),
+            }).populate("quizTopic", "title description hazardLevel");
+            if (!certificate) {
+                res
+                    .status(404)
+                    .json({ success: false, message: "Certificate records not found." });
+                return;
+            }
+            res.status(200).json({ success: true, data: certificate });
         }
         catch (error) {
             next(error);

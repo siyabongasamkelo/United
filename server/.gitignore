@@ -12,6 +12,11 @@
 /build
 /logs
 /tmp
+dist/
+build/
+out/
+bin/
+obj/
 
 # misc
 .DS_Store

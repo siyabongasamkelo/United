@@ -11,7 +11,7 @@ import {
 import { ArrowBackIos, Assessment } from "@mui/icons-material";
 import type { IAreaBranchResponse } from "../../services/managerConsoleService";
 import { FinancialLossCard } from "./FinancialLossCard";
-import { OperationalEffortCard } from "./OperationalEffortCard";
+// import { OperationalEffortCard } from "./OperationalEffortCard";
 import { TrendLineGraph } from "./TrendLineGraph";
 
 interface AnalyticsConsoleHubProps {

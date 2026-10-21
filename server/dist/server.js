@@ -17,6 +17,9 @@ const logger_1 = require("./shared/telemetry/logger");
 const store_routes_1 = __importDefault(require("./features/store/routes/store.routes"));
 const attendance_routes_1 = __importDefault(require("./features/attendance/routes/attendance.routes"));
 const store_routes_2 = __importDefault(require("./features/store/routes/store.routes"));
+const storeVisitRoutes_1 = __importDefault(require("./features/store-visits/routes/storeVisitRoutes"));
+const washReportRoutes_1 = __importDefault(require("./features/wash-report/routes/washReportRoutes"));
+const managersConsole_routes_1 = __importDefault(require("./features/managers-console/routes/managersConsole.routes"));
 // Initialize environment configuration variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -33,6 +36,9 @@ app.use("/api/v1/fix-reports", fixReport_routes_1.default);
 app.use("/api/v1/attendance", attendance_routes_1.default);
 app.use("/api/v1/admin", store_routes_1.default);
 app.use("/api/v1/stores", store_routes_2.default);
+app.use("/api/v1/store-visits", storeVisitRoutes_1.default);
+app.use("/api/v1/wash-report", washReportRoutes_1.default);
+app.use("/api/v1/managers-console", managersConsole_routes_1.default);
 // A simple system health ping to ensure the server core is running
 app.get("/health", (req, res) => {
     res.status(200).json({

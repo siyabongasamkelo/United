@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
 const FleetAuditController_1 = require("../controllers/FleetAuditController");
-const authMiddleware_1 = require("@/shared/middleware/authMiddleware");
+const authMiddleware_1 = require("../../../shared/middleware/authMiddleware.js");
 // ✅ Pristine absolute path alias pointing straight to your shared middleware folder!
 const router = express_1.default.Router();
 const controller = new FleetAuditController_1.FleetAuditController();

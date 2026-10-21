@@ -10,7 +10,7 @@ class FixReportService {
     constructor() {
         this.fixReportRepo = new FixReportRepository_1.FixReportRepository();
     }
-    async processNewFaultReport(payload, managerUserId) {
+    async processNewFaultReport(payload, managerUserId, managerBranchId) {
         const startTime = performance.now();
         // 1. Validate incoming data body properties via Zod schema checks
         const validatedInput = fixReportValidation_1.createFixReportPayloadSchema.parse(payload);
@@ -18,6 +18,7 @@ class FixReportService {
         const createdLog = await this.fixReportRepo.saveReport({
             trolleyId: validatedInput.trolleyId,
             storeOrigin: validatedInput.storeOriginId,
+            branchId: managerBranchId, // 🚀 Embedded here safely
             brokenComponent: validatedInput.brokenComponent,
             damageSeverity: validatedInput.damageSeverity,
             reportedBy: managerUserId,
@@ -29,11 +30,26 @@ class FixReportService {
             event: "ASSET_FAULT_REGISTERED",
             reportId: createdLog._id,
             trolleyId: createdLog.trolleyId,
+            branchId: managerBranchId, // 🚀 Added to tracking telemetry logs
             component: createdLog.brokenComponent,
             reportedBy: managerUserId,
             durationMs: Math.round(performance.now() - startTime),
         });
         return createdLog;
+    }
+    // Add this method inside your FixReportService class
+    async resolveStoreMaintenanceQueue(storeId, managerUserId) {
+        const startTime = performance.now();
+        const result = await this.fixReportRepo.bulkResolveStoreMaintenanceQueue(storeId);
+        // Issue structured winston execution logs out to tracking containers
+        logger_1.telemetry.info({
+            event: "STORE_MAINTENANCE_QUEUE_RESOLVED",
+            storeOriginId: storeId,
+            resolvedCount: result.modifiedCount,
+            actionedBy: managerUserId,
+            durationMs: Math.round(performance.now() - startTime),
+        });
+        return result;
     }
     async retrieveActiveQueue() {
         return await this.fixReportRepo.findActiveMaintenanceQueue();

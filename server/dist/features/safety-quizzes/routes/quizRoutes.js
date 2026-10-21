@@ -27,4 +27,6 @@ router.get("/branch-analytics", clerkAuth, authMiddleware_1.hydrateLocalUser, au
 router.post("/start", clerkAuth, authMiddleware_1.hydrateLocalUser, controller.startQuizSession);
 // Save an individual answer instantly when the worker clicks next/selects an option
 router.patch("/save-answer", clerkAuth, authMiddleware_1.hydrateLocalUser, controller.saveLiveAnswer);
+// Append this route inside your quizRoutes.ts file in File 5
+router.get("/certificate/:attemptId", clerkAuth, authMiddleware_1.hydrateLocalUser, controller.getCertificateByAttempt);
 exports.default = router;

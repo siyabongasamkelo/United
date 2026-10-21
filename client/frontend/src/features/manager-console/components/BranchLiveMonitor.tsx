@@ -1,4 +1,4 @@
-// 📂 File: src/features/manager-console/components/BranchLiveMonitor.tsx
+// 📂 File: src/features/manager-console/components/BranchLiveMonitor.tsx (PART 1)
 import {
   Box,
   Typography,
@@ -9,11 +9,21 @@ import {
   CardContent,
   Stack,
   Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
 } from "@mui/material";
-import { ArrowBackIos, Assessment, Storefront } from "@mui/icons-material";
+import {
+  ArrowBackIos,
+  Assessment,
+  Storefront,
+  Speed,
+  Equalizer,
+  Groups,
+} from "@mui/icons-material";
 import type { IAreaBranchResponse } from "../services/managerConsoleService";
 
-// Feature-Driven Component Imports
 import { OvernightAuditCard } from "./OvernightAuditCard";
 import { StoreSweepsCard } from "./StoreSweepsCard";
 import { FleetIntegrityCard } from "./FleetIntegrityCard";
@@ -58,8 +68,13 @@ export default function BranchLiveMonitor({
     );
   }
 
-  // 🚀 Extract our clean metrics, live personnel lists, and the dynamic stores array from the new packet
-  const { metrics, livePorters, storeVisitsToday, stores = [] } = liveData;
+  const {
+    metrics,
+    livePorters,
+    storeVisitsToday,
+    stores = [],
+    porterPerformanceRankings = [],
+  } = liveData;
 
   const lastUpdatedString = liveData.meta?.lastAuditLoggedAt
     ? new Date(liveData.meta.lastAuditLoggedAt).toLocaleTimeString("en-ZA", {
@@ -94,7 +109,6 @@ export default function BranchLiveMonitor({
         <Typography variant="h5" sx={{ fontWeight: "900", color: "#1e1b4b" }}>
           {branchMeta.name}
         </Typography>
-
         <Button
           variant="contained"
           startIcon={<Assessment />}
@@ -120,7 +134,7 @@ export default function BranchLiveMonitor({
         routing code: <strong>{branchMeta.branchCode}</strong>
       </Typography>
 
-      {/* ❶ SECTION A: GLOBAL BRANCH WIDE MATRIX OVERVIEW CARDS */}
+      {/* TOP KPI OVERVIEW CARDS */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, md: 4 }}>
           <OvernightAuditCard count={metrics.totalRegisteredFleet} />
@@ -143,7 +157,7 @@ export default function BranchLiveMonitor({
         </Grid>
       </Grid>
 
-      {/* ❷ SECTION B: THE DYNAMIC STORE-BY-STORE DATA CARD BLOCKS LOOP */}
+      {/* STOREFRONT FLEET STACK BREAKDOWN GRIDS */}
       <Typography
         variant="subtitle2"
         sx={{
@@ -157,7 +171,7 @@ export default function BranchLiveMonitor({
         Storefront Fleet Breakdown Loops
       </Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} sx={{ mb: 5 }}>
         {stores.map((store: any) => (
           <Grid key={store.storeId} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
@@ -176,7 +190,6 @@ export default function BranchLiveMonitor({
                     {store.storeName}
                   </Typography>
                 </Box>
-
                 <Stack
                   direction="row"
                   spacing={1.5}
@@ -195,7 +208,6 @@ export default function BranchLiveMonitor({
                     Total Fleet Units
                   </Typography>
                 </Stack>
-
                 <Stack spacing={1.5}>
                   <Box
                     sx={{
@@ -266,10 +278,142 @@ export default function BranchLiveMonitor({
         ))}
       </Grid>
 
-      {/* ❸ SECTION C: PERSONNEL SHIFT PLACEMENTS */}
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12 }}>
+      {/* BOTTOM ACCOUNTABILITY CONTROL PANELS GRID */}
+      <Grid container spacing={4}>
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+            <Groups sx={{ color: "#1e1b4b", fontSize: 20 }} />
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: "900",
+                color: "#1e1b4b",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Active Placement Roster
+            </Typography>
+          </Box>
           <ActivePersonnelMatrix livePorters={livePorters} />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+            <Equalizer sx={{ color: "#1e1b4b", fontSize: 20 }} />
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: "900",
+                color: "#1e1b4b",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Floor Sweep Velocity Leaderboard
+            </Typography>
+          </Box>
+          <Card
+            variant="outlined"
+            sx={{ borderRadius: 3, borderColor: "#cbd5e1", bgcolor: "#ffffff" }}
+          >
+            <CardContent sx={{ p: 2.5 }}>
+              {porterPerformanceRankings.length === 0 ? (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ textAlign: "center", py: 4, fontWeight: "600" }}
+                >
+                  No QR sweep data recorded for today.
+                </Typography>
+              ) : (
+                <List dense disablePadding>
+                  {porterPerformanceRankings.map((rank: any, index: number) => {
+                    const isLazy = rank.totalScansToday < 10;
+                    return (
+                      <ListItem
+                        key={rank.porterId}
+                        divider={index !== porterPerformanceRankings.length - 1}
+                        sx={{
+                          py: 1.5,
+                          px: 1,
+                          borderRadius: 2,
+                          mb: 0.5,
+                          bgcolor: isLazy ? "#fff1f2" : "transparent",
+                        }}
+                      >
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 32,
+                            fontWeight: "900",
+                            color: index === 0 ? "#d97706" : "#64748b",
+                          }}
+                        >
+                          #{index + 1}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: "800", color: "#0f172a" }}
+                            >
+                              {rank.fullName}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#64748b", fontWeight: "600" }}
+                            >
+                              Last active:{" "}
+                              {new Date(
+                                rank.lastScanLoggedAt,
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </Typography>
+                          }
+                        />
+                        <Stack spacing={0.5} sx={{ alignItems: "flex-end" }}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: "900",
+                              color: isLazy ? "#dc2626" : "#4f46e5",
+                            }}
+                          >
+                            {rank.totalScansToday} Scans
+                          </Typography>
+                          <Stack
+                            direction="row"
+                            spacing={0.5}
+                            sx={{ alignItems: "center" }}
+                          >
+                            <Speed
+                              sx={{
+                                fontSize: 12,
+                                color: isLazy ? "#ef4444" : "#16a34a",
+                              }}
+                            />
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontWeight: "700",
+                                color: isLazy ? "#ef4444" : "#16a34a",
+                              }}
+                            >
+                              {rank.scansPerHour}/hr speed
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

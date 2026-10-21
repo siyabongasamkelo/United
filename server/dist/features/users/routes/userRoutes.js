@@ -7,7 +7,7 @@ const express_1 = __importDefault(require("express"));
 const clerk_sdk_node_1 = require("@clerk/clerk-sdk-node");
 const UserController_1 = require("../controllers/UserController");
 // ✅ Pristine absolute path alias pointing straight to your shared middleware folder!
-const authMiddleware_1 = require("@/shared/middleware/authMiddleware");
+const authMiddleware_1 = require("../../../shared/middleware/authMiddleware.js");
 const router = express_1.default.Router();
 const controller = new UserController_1.UserController();
 // Cast Clerk's middleware function to clear any version signature type mismatches

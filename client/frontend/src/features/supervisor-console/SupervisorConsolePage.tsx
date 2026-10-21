@@ -72,6 +72,7 @@ export default function SupervisorConsolePage() {
             liveData={liveData}
             isLoading={isLoading}
             onBack={() => {}} // No-op: Back navigation is disabled for local branch context supervisors
+            onNavigateToAnalytics={() => {}} // ◄ FIX: Satisfies the strict required TypeScript prop check!
           />
         </Box>
       )}

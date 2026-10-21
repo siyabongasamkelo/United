@@ -16,6 +16,12 @@ const FixReportSchema = new mongoose_1.Schema({
         required: true,
         index: true,
     },
+    branchId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Branch", // Assuming your target branch model collection string identifier is 'Branch'
+        required: true,
+        index: true,
+    },
     brokenComponent: {
         type: String,
         enum: [

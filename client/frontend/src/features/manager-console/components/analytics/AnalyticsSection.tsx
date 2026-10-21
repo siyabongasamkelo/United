@@ -9,7 +9,7 @@ interface AnalyticsSectionProps {
   branchId: string;
 }
 
-export function AnalyticsSection({ metrics, branchId }: AnalyticsSectionProps) {
+export function AnalyticsSection({ metrics }: AnalyticsSectionProps) {
   const [timeUnit, setTimeUnit] = useState<"days" | "months">("days");
 
   // Simulated live trend packet mapping timeline coordinates
@@ -50,7 +50,7 @@ export function AnalyticsSection({ metrics, branchId }: AnalyticsSectionProps) {
           <OperationalEffortCard lostCount={metrics.lostTrolleys} />
         </Grid>
         <Grid size={{ xs: 12 }}>
-          <TrendLineGraph data={dummyTrendData} />
+          <TrendLineGraph data={dummyTrendData} timeScale={timeUnit} />
         </Grid>
       </Grid>
     </Box>

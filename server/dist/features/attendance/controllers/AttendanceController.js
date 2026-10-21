@@ -21,6 +21,25 @@ class AttendanceController {
             next(error);
         }
     };
+    /**
+     * 🆕 NEW HTTP POST HANDLER
+     * Route: POST /api/v1/attendance/clock-out
+     */
+    processClockOut = async (req, res, next) => {
+        try {
+            const localUserId = req.user?._id;
+            const { branchId, latitude, longitude } = req.body;
+            const result = await this.attendanceService.registerClockOut(String(localUserId), branchId, { latitude: Number(latitude), longitude: Number(longitude) });
+            res.status(200).json({
+                success: true,
+                message: "Your shift has been successfully finalized and recorded. Travel safe.",
+                data: result,
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    };
     getMyTodayHistory = async (req, res, next) => {
         try {
             const localUserId = req.user?._id;

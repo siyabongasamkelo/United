@@ -13,7 +13,7 @@ interface TrendLineGraphProps {
   timeScale: "days" | "months";
 }
 
-export function TrendLineGraph({ data, timeScale }: TrendLineGraphProps) {
+export function TrendLineGraph({ data }: TrendLineGraphProps) {
   // 🚀 Check if we have enough historical runway data points (e.g., less than 14 days)
   const isDataBaselineShort = data.length < 14;
 

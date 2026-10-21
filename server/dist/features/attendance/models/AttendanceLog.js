@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AttendanceLog = void 0;
+// 📂 File: features/attendance/models/AttendanceLog.ts
 const mongoose_1 = require("mongoose");
 const PpeDeclarationSchema = new mongoose_1.Schema({
     hasSafetyBoots: { type: Boolean, required: true },
@@ -25,16 +26,30 @@ const AttendanceLogSchema = new mongoose_1.Schema({
         enum: ["MORNING", "REINFORCEMENT", "NIGHT_SWEEPERS"],
         required: true,
     },
-    clockInTime: {
-        type: Date,
+    status: {
+        type: String,
+        enum: ["ACTIVE", "CLOCKED_OUT", "BREAK"],
+        default: "ACTIVE",
         required: true,
-        default: Date.now,
+        index: true,
     },
+    // Clock-In Vector Core
+    clockInTime: { type: Date, required: true, default: Date.now },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
     isGeofenceVerified: { type: Boolean, required: true, default: false },
     ppeDeclaration: { type: PpeDeclarationSchema, required: true },
+    ppeSelfieUrl: { type: String },
+    // Clock-Out Vector Core (Defaults to undefined until shift finalization)
+    clockOutTime: { type: Date },
+    clockOutLatitude: { type: Number },
+    clockOutLongitude: { type: Number },
+    // Device Metadata & Troubleshooting Properties
+    telemetry: {
+        batteryLevel: { type: Number },
+        platform: { type: String },
+    },
+    shiftNotes: { type: String, trim: true, maxLength: 300 },
 }, { timestamps: true });
-// Compounding unique index layout: Prevents an operator from logging the same shift wave twice on the same day
 AttendanceLogSchema.index({ user: 1, branch: 1, shiftWave: 1, createdAt: 1 });
 exports.AttendanceLog = (0, mongoose_1.model)("AttendanceLog", AttendanceLogSchema);
