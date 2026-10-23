@@ -36,6 +36,8 @@ export class AttendanceController {
    * 🆕 NEW HTTP POST HANDLER
    * Route: POST /api/v1/attendance/clock-out
    */
+  // 📂 File: features/attendance/controllers/AttendanceController.ts
+
   processClockOut = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -43,12 +45,11 @@ export class AttendanceController {
   ): Promise<void> => {
     try {
       const localUserId = req.user?._id;
-      const { branchId, latitude, longitude } = req.body;
 
+      // Pass req.body cleanly so the service can parse and validate it safely
       const result = await this.attendanceService.registerClockOut(
+        req.body,
         String(localUserId),
-        branchId,
-        { latitude: Number(latitude), longitude: Number(longitude) },
       );
 
       res.status(200).json({

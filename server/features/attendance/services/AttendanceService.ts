@@ -7,6 +7,10 @@ import {
 } from "../validations/attendanceValidation";
 import { createAppError } from "../../../shared/middleware/errorMiddleware";
 import { telemetry } from "../../../shared/telemetry/logger";
+import {
+  clockOutPayloadSchema,
+  ClockOutInput,
+} from "../validations/attendanceValidation"; // Ensure this import is at the top
 
 export class AttendanceService {
   private attendanceRepo: AttendanceRepository;
@@ -68,14 +72,14 @@ export class AttendanceService {
     return savedLog;
   }
 
-  async registerClockOut(
-    workerUserId: string,
-    branchId: string,
-    coordinates: { latitude: number; longitude: number },
-  ) {
+  async registerClockOut(payload: unknown, workerUserId: string) {
     const startTime = performance.now();
 
-    // 1. Fetch branch settings for dynamic clock-out boundary validation checks
+    // ❶ Enforce runtime validation parameters on the payload
+    const validatedInput: ClockOutInput = clockOutPayloadSchema.parse(payload);
+    const { branchId, latitude, longitude } = validatedInput;
+
+    // 2. Fetch branch settings for dynamic clock-out boundary validation checks
     const targetBranch = await Branch.findById(branchId);
     if (!targetBranch) {
       throw createAppError(
@@ -84,10 +88,10 @@ export class AttendanceService {
       );
     }
 
-    // 2. Enforce structural clock-out geofencing arrays
+    // 3. Enforce structural clock-out geofencing arrays
     const distanceMeters = this.attendanceRepo.calculateDistance(
-      coordinates.latitude,
-      coordinates.longitude,
+      latitude,
+      longitude,
       targetBranch.coordinates.latitude,
       targetBranch.coordinates.longitude,
     );
@@ -99,10 +103,11 @@ export class AttendanceService {
       );
     }
 
+    // 4. Finalize update with structured parameters
     const updatedLog = await this.attendanceRepo.finalizeClockOut(
       workerUserId,
       branchId,
-      coordinates,
+      { latitude, longitude },
     );
 
     if (!updatedLog) {

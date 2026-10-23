@@ -1,3 +1,5 @@
+// 📂 File: src/features/attendance/services/attendanceService.ts
+
 import { api } from "../../../shared/api/axiosInstance";
 
 export interface IPpeDeclaration {
@@ -14,12 +16,21 @@ export interface IClockInPayload {
   ppeDeclaration: IPpeDeclaration;
 }
 
+// 🆕 ADD THIS INTERFACE FOR THE CLOCK OUT REQUEST
+export interface IClockOutPayload {
+  branchId: string;
+  latitude: number;
+  longitude: number;
+}
+
 export interface IAttendanceLogResponse {
   _id: string;
   user: string;
   branch: string;
   shiftWave: "MORNING" | "REINFORCEMENT" | "NIGHT_SWEEPERS";
+  status: "ACTIVE" | "CLOCKED_OUT" | "BREAK"; // 🆕 Tracks the current log state
   clockInTime: string;
+  clockOutTime?: string; // 🆕 Added matching database lifecycle schema
   latitude: number;
   longitude: number;
   isGeofenceVerified: boolean;
@@ -39,6 +50,20 @@ export class AttendanceService {
       message: string;
       data: IAttendanceLogResponse;
     }>("/attendance/clock-in", payload);
+    return response.data.data;
+  }
+
+  /**
+   * 🆕 POST: Transmits final GPS coordinates to conclude the shift lifecycle safely
+   */
+  static async clockOut(
+    payload: IClockOutPayload,
+  ): Promise<IAttendanceLogResponse> {
+    const response = await api.post<{
+      success: boolean;
+      message: string;
+      data: IAttendanceLogResponse;
+    }>("/attendance/clock-out", payload);
     return response.data.data;
   }
 

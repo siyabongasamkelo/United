@@ -1,6 +1,7 @@
 // 📂 File: src/features/attendance/hooks/useAttendanceForm.ts
+
 import { useState, useEffect } from "react";
-import { useUser } from "../../users/context/UserContext"; // 🚀 Reading your rich MongoDB profile provider
+import { useUser } from "../../users/context/UserContext";
 import { AttendanceService } from "../services/attendanceService";
 import type { IAttendanceLogResponse } from "../services/attendanceService";
 
@@ -49,7 +50,6 @@ export function useAttendanceForm() {
       return;
     }
 
-    // 🚨 ARCHITECTURAL ENFORCEMENT CHECK: Guard against missing assignments
     if (!currentUser.branchId) {
       setFeedback({
         type: "error",
@@ -58,7 +58,6 @@ export function useAttendanceForm() {
       return;
     }
 
-    // 💡 FIX: Save to a local variable. TypeScript now guarantees this is a strict 'string'
     const verifiedBranchId = currentUser.branchId;
 
     if (!shiftWave) {
@@ -88,13 +87,11 @@ export function useAttendanceForm() {
       return;
     }
 
-    // Enforce high-accuracy hardware geolocation sweeps
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          // 🎯 DYNAMIC HOOK LINK: Using the guaranteed safe local variable
           await AttendanceService.clockIn({
-            branchId: verifiedBranchId, // ◄ No more TS2322 null error!
+            branchId: verifiedBranchId,
             shiftWave: shiftWave as any,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -110,7 +107,6 @@ export function useAttendanceForm() {
             msg: `🎉 Clock-in confirmed! Verified inside your branch geofence perimeter.`,
           });
 
-          // Reset fields and refresh log history lists
           setShiftWave("");
           setHasSafetyBoots(false);
           setHasReflectorVest(false);
@@ -141,6 +137,75 @@ export function useAttendanceForm() {
     );
   };
 
+  /**
+   * 🆕 NEW EXPLICIT LIFECYCLE ACTION: handleClockOutSubmit
+   * Sweeps hardware spatial arrays and updates server tracking logs directly
+   */
+  const handleClockOutSubmit = async (onSuccessCallback?: () => void) => {
+    setFeedback(null);
+
+    if (!currentUser || !currentUser.branchId) {
+      setFeedback({
+        type: "error",
+        msg: "⚠️ Profile Constraint Error: Security profile context or assigned branch workspace missing.",
+      });
+      return;
+    }
+
+    const verifiedBranchId = currentUser.branchId;
+    setIsSubmitting(true);
+
+    if (!navigator.geolocation) {
+      setFeedback({
+        type: "error",
+        msg: "GPS tracking is not supported or active on this device browser.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          await AttendanceService.clockOut({
+            branchId: verifiedBranchId,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+
+          setFeedback({
+            type: "success",
+            msg: "👋 Clock-out finalized! Your active shift record has been successfully closed. Travel safe.",
+          });
+
+          await loadTodayLogs();
+          if (onSuccessCallback) onSuccessCallback();
+        } catch (err: any) {
+          setFeedback({
+            type: "error",
+            msg:
+              err.response?.data?.message ||
+              err.message ||
+              "Geofence clock-out execution error.",
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+      (error) => {
+        setIsSubmitting(false);
+        let errorMsg =
+          "Unable to retrieve device GPS vectors for clock-out boundary lines.";
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMsg =
+            "Location access denied. GPS access is strictly required to finalize your shift.";
+        }
+        setFeedback({ type: "error", msg: `⚠️ GPS Error: ${errorMsg}` });
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
   return {
     currentUser,
     shiftWave,
@@ -155,5 +220,6 @@ export function useAttendanceForm() {
     feedback,
     historyLogs,
     handleClockInSubmit,
+    handleClockOutSubmit, // 🆕 Exposed to components
   };
 }
